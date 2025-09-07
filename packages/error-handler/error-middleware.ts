@@ -1,5 +1,5 @@
-import { AppError } from "./index";
 import { Request, Response } from "express";
+import { AppError } from "./index";
 
 export const errorMiddelware = (err: Error, req: Request, res: Response) => {
   if (err instanceof AppError) {

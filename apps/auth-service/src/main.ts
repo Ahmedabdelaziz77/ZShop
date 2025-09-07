@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { errorMiddelware } from "../../../packages/error-handler/error-middleware";
 
 const app = express();
 
@@ -14,6 +15,8 @@ app.use(
 app.get("/", (req, res) => {
   res.send({ message: "Hello API" });
 });
+
+app.use(errorMiddelware);
 
 const port = process.env.PORT || 6001;
 const server = app.listen(port, () => {
