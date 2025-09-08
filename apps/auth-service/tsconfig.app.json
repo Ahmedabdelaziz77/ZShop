@@ -1,12 +1,17 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "out-tsc/auth-service",
     "types": ["node"],
-    "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
+    "tsBuildInfoFile": "out-tsc/auth-service/tsconfig.app.tsbuildinfo",
     "rootDir": "../../"
   },
-  "include": ["src/**/*.ts", "../../packages/error-handler/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "../../packages/error-handler/**/*.ts",
+    "../../packages/libs/prisma/**/*.ts",
+    "../../packages/libs/redis/**/*.ts"
+  ],
   "exclude": [
     "out-tsc",
     "dist",
