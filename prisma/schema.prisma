@@ -14,9 +14,9 @@ model images {
   url String
   userId String? @db.ObjectId @unique
   users users? @relation(fields: [userId], references: [id])
-  description String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // description String?
+  // createdAt DateTime @default(now())
+  // updatedAt DateTime @updatedAt
 }
 
 model users {
