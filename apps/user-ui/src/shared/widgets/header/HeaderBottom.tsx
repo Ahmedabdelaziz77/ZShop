@@ -49,7 +49,7 @@ export default function HeaderBottom() {
           <div
             className={`absolute left-0 ${
               isSticky ? "top-[70px]" : "top-[50px]"
-            } w-[260px] h-[400px] bg-[#f5f5f5]`}
+            } w-[280px] h-[400px] bg-[#f5f5f5]`}
           ></div>
         )}
         {/* NAV LINKS */}
