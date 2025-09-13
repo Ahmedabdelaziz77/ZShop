@@ -2,13 +2,12 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
 
 import GoogleButton from "apps/user-ui/src/shared/components/google-button";
 import { useMutation } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 
 type FormData = {
   name: string;
@@ -18,15 +17,13 @@ type FormData = {
 
 export default function Signup() {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
+  const [serverError, _setServerError] = useState<string | null>(null);
   const [canResend, setCanResend] = useState(true);
   const [showOtp, setShowOtp] = useState(false);
   const [timer, setTimer] = useState(60);
   const [otp, setOtp] = useState(["", "", "", ""]);
-  const [userData, setUserData] = useState<FormData | null>(null);
+  const [_userData, setUserData] = useState<FormData | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  const router = useRouter();
 
   const {
     register,

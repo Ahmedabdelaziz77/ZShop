@@ -3,7 +3,6 @@
 import GoogleButton from "apps/user-ui/src/shared/components/google-button";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -14,9 +13,8 @@ type FormData = {
 
 export default function Login() {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
+  const [serverError, _setServerError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
-  const router = useRouter();
 
   const {
     register,
