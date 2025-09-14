@@ -123,7 +123,7 @@ export const handleForgotPassword = async (
     await checkOtpRestrictions(email, next);
     await trackOtpRequests(email, next);
 
-    await sendOtp(email, user.name, "forgot-password-user-mail");
+    await sendOtp(user.name, email, "forgot-password-user-mail");
 
     res.status(200).json({
       message: "OTP sent to email. Please verify to reset your password.",

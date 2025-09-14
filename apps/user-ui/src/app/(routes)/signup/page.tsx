@@ -109,11 +109,10 @@ export default function Signup() {
   };
 
   const resendOtp = () => {
-    setOtp(["", "", "", ""]);
-    setCanResend(false);
-    setTimer(60);
-    startResendTimer();
-    // here you'd call API to resend
+    if (userData) {
+      setOtp(["", "", "", ""]);
+      signupMutation.mutate(userData);
+    }
   };
 
   return (

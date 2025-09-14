@@ -10,7 +10,8 @@
     "src/**/*.ts",
     "../../packages/error-handler/**/*.ts",
     "../../packages/libs/prisma/**/*.ts",
-    "../../packages/libs/redis/**/*.ts"
+    "../../packages/libs/redis/**/*.ts",
+    "../../packages/middleware/**/*.ts"
   ],
   "exclude": [
     "out-tsc",
