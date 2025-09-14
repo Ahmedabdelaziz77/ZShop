@@ -4,10 +4,11 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
-
-import GoogleButton from "apps/user-ui/src/shared/components/google-button";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import Loader from "apps/user-ui/src/shared/components/Loader";
+import GoogleButton from "apps/user-ui/src/shared/components/google-button";
+import { useRouter } from "next/navigation";
 
 type FormData = {
   name: string;
@@ -17,13 +18,13 @@ type FormData = {
 
 export default function Signup() {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [serverError, _setServerError] = useState<string | null>(null);
   const [canResend, setCanResend] = useState(true);
   const [showOtp, setShowOtp] = useState(false);
   const [timer, setTimer] = useState(60);
   const [otp, setOtp] = useState(["", "", "", ""]);
-  const [_userData, setUserData] = useState<FormData | null>(null);
+  const [userData, setUserData] = useState<FormData | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const router = useRouter();
 
   const {
     register,
@@ -61,6 +62,23 @@ export default function Signup() {
     },
   });
 
+  const verifyOtpMutation = useMutation({
+    mutationFn: async () => {
+      if (!userData) return;
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_SERVER_URI}/api/verify-user`,
+        {
+          ...userData,
+          otp: otp.join(""),
+        }
+      );
+      return res.data;
+    },
+    onSuccess: () => {
+      router.push("/login");
+    },
+  });
+
   const onSubmit = (data: FormData) => {
     signupMutation.mutate(data);
   };
@@ -79,16 +97,24 @@ export default function Signup() {
     i: number,
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
-    if (e.key === "Backspace" && !otp[i] && i > 0)
+    if (e.key === "Backspace" && !otp[i] && i > 0) {
       inputRefs.current[i - 1]?.focus();
-
-    if (e.key === "ArrowLeft" && i > 0) inputRefs.current[i - 1]?.focus();
-
-    if (e.key === "ArrowRight" && i < otp.length - 1)
+    }
+    if (e.key === "ArrowLeft" && i > 0) {
+      inputRefs.current[i - 1]?.focus();
+    }
+    if (e.key === "ArrowRight" && i < otp.length - 1) {
       inputRefs.current[i + 1]?.focus();
+    }
   };
 
-  const resendOtp = () => {};
+  const resendOtp = () => {
+    setOtp(["", "", "", ""]);
+    setCanResend(false);
+    setTimer(60);
+    startResendTimer();
+    // here you'd call API to resend
+  };
 
   return (
     <div className="w-full min-h-[85vh] bg-gray-100 py-12 flex flex-col items-center animate-fadeIn">
@@ -125,10 +151,11 @@ export default function Signup() {
             <span className="px-3 text-gray-400 text-sm">Or sign up with</span>
             <div className="flex-1 border-t border-gray-300" />
           </div>
+
           {!showOtp ? (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               {/* NAME FIELD */}
-              <div className="animate-fadeIn delay-150">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Name
                 </label>
@@ -148,7 +175,7 @@ export default function Signup() {
               </div>
 
               {/* EMAIL FIELD */}
-              <div className="animate-fadeIn delay-200">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
@@ -172,7 +199,7 @@ export default function Signup() {
               </div>
 
               {/* PASSWORD FIELD */}
-              <div className="animate-fadeIn delay-300">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password
                 </label>
@@ -204,19 +231,29 @@ export default function Signup() {
                 )}
               </div>
 
-              {/* SUBMIT BUTTON */}
+              {/* SIGNUP BUTTON */}
               <button
                 type="submit"
-                className="w-full mt-4 rounded-lg bg-black text-white py-3 text-base font-medium hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                disabled={signupMutation.isPending}
+                className="w-full mt-4 rounded-lg bg-black text-white py-3 text-base font-medium hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Signup
+                {signupMutation.isPending ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader size={24} color="text-blue-300" /> Signing up...
+                  </div>
+                ) : (
+                  "Signup"
+                )}
               </button>
 
-              {serverError && (
-                <p className="text-red-500 text-sm text-center mt-2 animate-shake">
-                  {serverError}
-                </p>
-              )}
+              {/* SIGNUP ERROR */}
+              {signupMutation.isError &&
+                signupMutation.error instanceof AxiosError && (
+                  <p className="text-red-500 text-sm mt-2">
+                    {signupMutation.error.response?.data?.message ||
+                      signupMutation.error.message}
+                  </p>
+                )}
             </form>
           ) : (
             // OTP
@@ -224,34 +261,48 @@ export default function Signup() {
               <h3 className="text-xl font-semibold text-center mb-4">
                 Enter OTP
               </h3>
-              <div className="flex justify-center gap-6">
+              <div className="flex justify-center gap-4">
                 {otp.map((digit, i) => (
                   <input
-                    type="text"
                     key={i}
                     ref={(el) => {
                       if (el) inputRefs.current[i] = el;
                     }}
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="-"
                     maxLength={1}
                     aria-label={`OTP digit ${i + 1}`}
-                    className="w-12 h-12 text-center border border-gray-300 outline-none !rounded"
+                    className="w-12 h-12 text-center border border-gray-300 outline-none !rounded focus:ring-2 focus:ring-blue-500 transition-all"
                     value={digit}
                     onChange={(e) => handleOtpChange(i, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(i, e)}
                   />
                 ))}
               </div>
+
+              {/* VERIFY OTP BUTTON */}
               <button
                 type="button"
-                className="w-full mt-4 text-lg cursor-pointer bg-blue-500 text-white py-2 rounded-lg"
+                disabled={verifyOtpMutation.isPending}
+                onClick={() => verifyOtpMutation.mutate()}
+                className="w-full mt-4 rounded-lg bg-blue-500 text-white py-3 text-base font-medium hover:bg-blue-600 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Verify OTP
+                {verifyOtpMutation.isPending ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader size={20} color="text-white" /> Verifying...
+                  </div>
+                ) : (
+                  "Verify OTP"
+                )}
               </button>
+
+              {/* RESEND OTP */}
               <p className="text-center text-sm mt-4">
                 {canResend ? (
                   <button
                     onClick={resendOtp}
-                    className="text-blue-500 cursor-pointer"
+                    className="text-blue-500 cursor-pointer hover:underline"
                   >
                     Resend OTP
                   </button>
@@ -259,6 +310,15 @@ export default function Signup() {
                   `Resend OTP in ${timer}s`
                 )}
               </p>
+
+              {/* VERIFY ERROR */}
+              {verifyOtpMutation.isError &&
+                verifyOtpMutation.error instanceof AxiosError && (
+                  <p className="text-red-500 text-sm mt-2 text-center">
+                    {verifyOtpMutation.error.response?.data?.message ||
+                      verifyOtpMutation.error.message}
+                  </p>
+                )}
             </div>
           )}
         </div>

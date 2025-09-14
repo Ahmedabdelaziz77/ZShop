@@ -92,7 +92,7 @@ export const loginUser = async (
     if (!user) return next(new AuthError("User doesn't exist!"));
 
     const isMatching = await bcrypt.compare(password, user.password!);
-    if (!isMatching) return next(new AuthError("Invalid credentials!"));
+    if (!isMatching) return next(new AuthError("Invalid Email or Password!"));
 
     const accessToken = jwt.sign(
       { id: user.id, role: "user" },

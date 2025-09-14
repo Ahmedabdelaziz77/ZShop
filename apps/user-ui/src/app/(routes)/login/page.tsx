@@ -1,8 +1,12 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
 import GoogleButton from "apps/user-ui/src/shared/components/google-button";
+import Loader from "apps/user-ui/src/shared/components/Loader";
+import axios, { AxiosError } from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -13,8 +17,9 @@ type FormData = {
 
 export default function Login() {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [serverError, _setServerError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
+
+  const router = useRouter();
 
   const {
     register,
@@ -22,7 +27,23 @@ export default function Login() {
     formState: { errors },
   } = useForm<FormData>();
 
-  const onSubmit = (data: FormData) => {};
+  const loginMutation = useMutation({
+    mutationFn: async (data: FormData) => {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_SERVER_URI}/api/login-user`,
+        data,
+        { withCredentials: true }
+      );
+      return res.data;
+    },
+    onSuccess: () => {
+      router.push("/");
+    },
+  });
+
+  const onSubmit = (data: FormData) => {
+    loginMutation.mutate(data);
+  };
 
   return (
     <div className="w-full min-h-[85vh] bg-gray-100 py-12 flex flex-col items-center animate-fadeIn">
@@ -30,7 +51,7 @@ export default function Login() {
       <h1 className="text-4xl font-bold text-gray-900 font-Poppins animate-slideDown">
         Login
       </h1>
-      <p className="text-base text-gray-500 mt-2 animate-fadeIn delay-100">
+      <p className="text-base text-gray-500 mt-2 animate-fadeIn delay-100 mb-2">
         Home <span className="mx-1">•</span> Login
       </p>
 
@@ -56,7 +77,9 @@ export default function Login() {
           {/* DIVIDER */}
           <div className="flex items-center my-6">
             <div className="flex-1 border-t border-gray-300" />
-            <span className="px-3 text-gray-400 text-sm">Or sign in with</span>
+            <span className="px-3 text-xs text-gray-400 uppercase tracking-wide">
+              Or sign in with
+            </span>
             <div className="flex-1 border-t border-gray-300" />
           </div>
 
@@ -106,6 +129,9 @@ export default function Login() {
                 />
                 <button
                   type="button"
+                  aria-label={
+                    passwordVisible ? "Hide password" : "Show password"
+                  }
                   onClick={() => setPasswordVisible(!passwordVisible)}
                   className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                 >
@@ -121,10 +147,10 @@ export default function Login() {
 
             {/* REMEMBER + FORGOT */}
             <div className="flex justify-between items-center text-sm animate-fadeIn delay-300">
-              <label className="flex items-center text-gray-600 cursor-pointer transition-colors hover:text-gray-800">
+              <label className="flex items-center gap-2 text-gray-600 cursor-pointer transition-colors hover:text-gray-800">
                 <input
                   type="checkbox"
-                  className="mr-2 rounded accent-blue-600"
+                  className="rounded accent-blue-600"
                   checked={rememberMe}
                   onChange={() => setRememberMe(!rememberMe)}
                 />
@@ -141,16 +167,26 @@ export default function Login() {
             {/* SUBMIT BUTTON */}
             <button
               type="submit"
-              className="w-full rounded-lg bg-black text-white py-3 text-base font-medium hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02]"
+              disabled={loginMutation.isPending}
+              className="w-full rounded-lg bg-black text-white py-3 text-base font-medium hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Login
+              {loginMutation.isPending ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader size={24} color="text-white" /> Logging in...
+                </div>
+              ) : (
+                "Login"
+              )}
             </button>
 
-            {serverError && (
-              <p className="text-red-500 text-sm text-center mt-2 animate-shake">
-                {serverError}
-              </p>
-            )}
+            {/* SERVER ERROR */}
+            {loginMutation.isError &&
+              loginMutation.error instanceof AxiosError && (
+                <p className="text-red-500 text-sm text-center mt-2 animate-shake">
+                  {(loginMutation.error.response?.data as { message?: string })
+                    ?.message || loginMutation.error.message}
+                </p>
+              )}
           </form>
         </div>
       </div>
