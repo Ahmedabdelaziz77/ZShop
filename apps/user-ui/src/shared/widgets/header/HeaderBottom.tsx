@@ -1,16 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { AlignLeft, ChevronDown } from "lucide-react";
+import Link from "next/link";
+
+import useUser from "apps/user-ui/src/hooks/useUser";
+import { navItems } from "../../../configs/constants";
+
 import { CartIcon } from "../../../assets/svg/cart-icon";
 import { HeartIcon } from "../../../assets/svg/heart-icon";
 import { ProfileIcon } from "../../../assets/svg/profile-icon";
-import { navItems } from "../../../configs/constants";
-import { AlignLeft, ChevronDown } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import Loader from "../../components/Loader";
 
 export default function HeaderBottom() {
   const [show, setShow] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
+
+  const { user, isLoading } = useUser();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,16 +71,41 @@ export default function HeaderBottom() {
           {isSticky && (
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-2">
-                <Link
-                  href={"/login"}
-                  className="border-2 w-[50px] h-[50px] flex items-center justify-center rounded-full border-[#010f1c1a]"
-                >
-                  <ProfileIcon />
-                </Link>
-                <Link href={"/login"}>
-                  <span className="block font-medium">Hello, </span>
-                  <span className="font-semibold">Sign In</span>
-                </Link>
+                {!isLoading && user ? (
+                  <>
+                    <Link
+                      href={"/profile"}
+                      className="border-2 w-[50px] h-[50px] flex items-center justify-center rounded-full border-[#010f1c1a]"
+                    >
+                      <ProfileIcon />
+                    </Link>
+                    <Link href={"/profile"}>
+                      <span className="block font-medium">Hello, </span>
+                      <span className="font-semibold">
+                        {user?.name?.split(" ")[0]}
+                      </span>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href={"/login"}
+                      className="border-2 w-[50px] h-[50px] flex items-center justify-center rounded-full border-[#010f1c1a]"
+                    >
+                      <ProfileIcon />
+                    </Link>
+                    <Link href={"/login"}>
+                      <span className="block font-medium">Hello, </span>
+                      <span className="font-semibold">
+                        {isLoading ? (
+                          <Loader size={16} color="text-black" />
+                        ) : (
+                          "Sign In"
+                        )}
+                      </span>
+                    </Link>
+                  </>
+                )}
               </div>
               <div className="flex items-center gap-5">
                 <Link href={"/wishlist"} className="relative">
