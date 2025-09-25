@@ -99,6 +99,9 @@ export const loginUser = async (
     const isMatching = await bcrypt.compare(password, user.password!);
     if (!isMatching) return next(new AuthError("Invalid Email or Password!"));
 
+    res.clearCookie("seller-access-token");
+    res.clearCookie("seller-refresh-token");
+
     const accessToken = jwt.sign(
       { id: user.id, role: "user" },
       process.env.ACCESS_TOKEN_SECRET as string,
@@ -125,13 +128,16 @@ export const loginUser = async (
   }
 };
 
-export const refreshTokenUser = async (
-  req: Request,
+export const refreshToken = async (
+  req: any,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const refreshToken = req.cookies.refresh_token;
+    const refreshToken =
+      req.cookies["refresh_token"] ||
+      req.cookies["seller-refresh-token"] ||
+      req.headers.authorization?.split(" ")[1];
     if (!refreshToken)
       throw new ValidationError("Unauthorized! No refresh token.");
 
@@ -142,21 +148,33 @@ export const refreshTokenUser = async (
     if (!decoded || !decoded.id || !decoded.role)
       throw new JsonWebTokenError("Forbidden! Invalid refresh token.");
 
-    // let acc;
-    // if (decoded.role === "user")
-    const user = await prisma.users.findUnique({
-      where: { id: decoded.id },
-    });
-    if (!user) throw new AuthError("Forbidden! User/Seller not found");
+    let acc;
+    if (decoded.role === "user")
+      acc = await prisma.users.findUnique({
+        where: { id: decoded.id },
+      });
+    else if (decoded.role === "seller")
+      acc = await prisma.sellers.findUnique({
+        where: { id: decoded.id },
+        include: { shop: true },
+      });
+    if (!acc) throw new AuthError("Forbidden! User/Seller not found");
 
     const newAccessToken = jwt.sign(
       { id: decoded.id, role: decoded.role },
       process.env.ACCESS_TOKEN_SECRET!,
       { expiresIn: "15m" }
     );
-    setCookie(res, "access_token", newAccessToken);
+
+    const cookieName =
+      decoded.role === "seller" ? "seller-access-token" : "access_token";
+    setCookie(res, cookieName, newAccessToken);
+
+    req.role = decoded.role;
+
     return res.status(201).json({
       success: true,
+      accessToken: newAccessToken,
     });
   } catch (err) {
     return next(err);
@@ -395,6 +413,9 @@ export const loginSeller = async (
     const isMatch = await bcrypt.compare(password, seller.password);
     if (!isMatch)
       return next(new ValidationError("Invalid email or password!"));
+
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
 
     const accessToken = jwt.sign(
       {
