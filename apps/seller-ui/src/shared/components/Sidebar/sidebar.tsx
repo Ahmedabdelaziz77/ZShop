@@ -30,8 +30,6 @@ export default function SideBarWrapper() {
   const pathname = usePathname();
   const { seller } = useSeller();
 
-  console.log(seller);
-
   useEffect(() => {
     setActiveSidebar(pathname);
   }, [pathname, setActiveSidebar]);
