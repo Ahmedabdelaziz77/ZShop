@@ -9,12 +9,19 @@ import Input from "packages/components/input/index";
 import ColorSelector from "packages/components/color-selector";
 import CustomSpecifications from "packages/components/custom-specifications";
 import CustomProperties from "packages/components/custom-properties";
-import RichTextEditor from "packages/components/rich-text-editor";
+
 import SizeSelector from "packages/components/size-selector";
 
 import ImagePlaceHolder from "apps/seller-ui/src/shared/components/image-placeholder";
 import Loader from "apps/seller-ui/src/shared/components/Loader";
 import axiosInstance from "apps/seller-ui/src/utils/axiosInstance";
+
+import dynamic from "next/dynamic";
+
+const RichTextEditor = dynamic(
+  () => import("packages/components/rich-text-editor"),
+  { ssr: false }
+);
 
 export default function Page() {
   const {
