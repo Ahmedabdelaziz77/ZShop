@@ -1,5 +1,4 @@
-import { AuthError } from "@packages/error-handler";
-
+import { AuthError } from "packages/error-handler";
 import { NextFunction, Response } from "express";
 
 export const isSeller = (req: any, res: Response, next: NextFunction) => {
