@@ -17,7 +17,6 @@ import Loader from "apps/seller-ui/src/shared/components/Loader";
 import axiosInstance from "apps/seller-ui/src/utils/axiosInstance";
 
 import dynamic from "next/dynamic";
-
 const RichTextEditor = dynamic(
   () => import("packages/components/rich-text-editor"),
   { ssr: false }
