@@ -74,6 +74,18 @@ export default function Page() {
     staleTime: 1000 * 60 * 5,
     retry: 2,
   });
+
+  const { data: discountCodes = [], isLoading: discountLoading } = useQuery({
+    queryKey: ["shop-discounts"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/product/api/get-discount-codes");
+      return res?.data?.discount_codes || [];
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5,
+    retry: 2,
+  });
+
   const categories = data?.categories || [];
   const subCategoriesData = data?.subCategories || {};
 
@@ -515,9 +527,57 @@ export default function Page() {
 
               {/* SELECTING DISCOUNT  */}
               <div className="mt-3">
-                <label className="block font-semibold text-gray-300 mb-1">
-                  Select Discount Codes (optional)
+                <label className="block font-semibold text-gray-300 mb-2 text-sm">
+                  Select Discount Codes{" "}
+                  <span className="text-gray-400">(optional)</span>
                 </label>
+
+                {discountLoading ? (
+                  <p className="text-gray-400 text-sm italic">
+                    Loading discount codes...
+                  </p>
+                ) : discountCodes.length === 0 ? (
+                  <p className="text-gray-500 text-sm italic">
+                    No discount codes available.
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {discountCodes.map((discount: any) => {
+                      const isSelected = watch("discountCodes")?.includes(
+                        discount.id
+                      );
+
+                      return (
+                        <button
+                          key={discount.id}
+                          type="button"
+                          onClick={() => {
+                            const currentSelection =
+                              watch("discountCodes") || [];
+                            const updatedSelection = isSelected
+                              ? currentSelection.filter(
+                                  (id: string) => id !== discount.id
+                                )
+                              : [...currentSelection, discount.id];
+                            setValue("discountCodes", updatedSelection);
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-200
+              ${
+                isSelected
+                  ? "bg-blue-600 text-white border-blue-600 shadow-md hover:bg-blue-700"
+                  : "bg-gray-800 text-gray-300 border-gray-600 hover:border-gray-500 hover:text-white"
+              }`}
+                        >
+                          <span>{discount?.public_name}</span>
+                          <span className="ml-2 text-xs font-normal opacity-80">
+                            {discount.discountValue}
+                            {discount.discountType === "percentage" ? "%" : "$"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/*  */}

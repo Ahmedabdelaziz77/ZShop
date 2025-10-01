@@ -25,6 +25,8 @@ export default function Page() {
       return res?.data?.discount_codes || [];
     },
     refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5,
+    retry: 2,
   });
 
   const {
