@@ -9,27 +9,29 @@ datasource db {
 }
 
 model images {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  file_id String
-  url String
-  userId String? @unique @db.ObjectId
-  shopId String? @unique @db.ObjectId
-  users users? @relation(fields: [userId], references: [id])
-  shops shops? @relation(fields: [shopId], references: [id])
-}
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  file_id     String
+  url         String
 
+  userId      String?  @unique @db.ObjectId   
+  shopId      String?  @unique @db.ObjectId
+  productsId  String?  @db.ObjectId
+
+  user        users?     @relation(name: "UserAvatar",  fields: [userId],     references: [id])
+  shop        shops?     @relation(name: "ShopAvatar",  fields: [shopId],     references: [id])
+  product     products?  @relation(name: "ProductImages", fields: [productsId], references: [id])
+}
 model users {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  email String @unique
-  password String?
-  following String[]
-  avatar images?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  shopReviews shopReviews[]
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String   @unique
+  password      String?
+  following     String[]
+  avatar        images?  @relation(name: "UserAvatar")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  shopReviews   shopReviews[]
 }
-
 model shopReviews {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   userId String @db.ObjectId
@@ -42,23 +44,24 @@ model shopReviews {
   shops shops? @relation(fields: [shopsId], references: [id])
 }
 
-model shops{
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  bio String?
-  category String
-  avatar images?
-  coverBanner String?
-  address String
+model shops {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  bio           String?
+  category      String
+  avatar        images?  @relation(name: "ShopAvatar")
+  coverBanner   String?
+  address       String
   opening_hours String?
-  website String?
-  socialLinks Json[]
-  ratings Float @default(0)
-  reviews shopReviews[]
-  sellerId String @unique @db.ObjectId
-  sellers sellers @relation(fields: [sellerId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  website       String?
+  socialLinks   Json[]
+  ratings       Float    @default(0)
+  reviews       shopReviews[]
+  sellerId      String   @unique @db.ObjectId
+  sellers       sellers  @relation(fields: [sellerId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  products      products[]
 }
 
 model sellers {
@@ -90,4 +93,42 @@ model discount_codes{
   updatedAt DateTime @updatedAt
 }
 
-// model product {}
+enum productStatus{
+  Active
+  Pending
+  Draft
+}
+
+model products {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  title                 String
+  slug                  String   @unique
+  category              String
+  subCategory           String
+  short_description     String
+  detailed_description  String
+  images                images[] @relation(name: "ProductImages")
+  video_url             String?
+  tags                  String[]
+  brand                 String?
+  colors                String[]
+  sizes                 String[]
+  starting_date         DateTime?
+  ending_date           DateTime?
+  stock                 Int
+  sale_price            Float
+  regular_price         Float
+  ratings               Float    @default(5)
+  warranty              String?
+  custom_specifications Json?
+  custom_properties     Json
+  isDeleted             Boolean? @default(false)
+  cashOnDelivery        String?
+  discount_codes        String[] @db.ObjectId
+  status                productStatus @default(Active)
+  deletedAt             DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  shopId                String   @db.ObjectId
+  shop                  shops    @relation(fields: [shopId], references: [id])
+}

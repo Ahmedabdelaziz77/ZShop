@@ -114,11 +114,11 @@ export default function SideBarWrapper() {
                 icon={
                   <PackageSearch
                     size={22}
-                    color={getIconColor("/dashboard/all-product")}
+                    color={getIconColor("/dashboard/all-products")}
                   />
                 }
-                isActive={activeSidebar === "/dashboard/all-product"}
-                href="/dashboard/all-product"
+                isActive={activeSidebar === "/dashboard/all-products"}
+                href="/dashboard/all-products"
               />
             </SidebarMenu>
             {/* EVENTS */}

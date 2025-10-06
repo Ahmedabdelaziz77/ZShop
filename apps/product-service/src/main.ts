@@ -1,8 +1,10 @@
 import express from "express";
+import "./jobs/product-cron.job";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { errorMiddelware } from "packages/error-handler/error-middleware";
+
 import router from "./routes/productRoutes";
+import { errorMiddelware } from "packages/error-handler/error-middleware";
 
 import swaggerUi from "swagger-ui-express";
 const swaggerDocument = require("./swagger-output.json");
@@ -19,6 +21,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.get("/", (req, res) => {
