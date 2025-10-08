@@ -1,6 +1,6 @@
 import Header from "../shared/widgets/header";
 import "./global.css";
-import { Poppins, Roboto } from "next/font/google";
+import { Poppins, Inter, Oregano } from "next/font/google";
 import Providers from "./providers";
 
 export const metadata = {
@@ -8,16 +8,22 @@ export const metadata = {
   description: "Zshop _ Multi-Vendor SaaS Platform",
 };
 
-const roboto = Roboto({
+const inter = Inter({
   subsets: ["latin"],
   weight: ["100", "300", "400", "500", "700", "900"],
-  variable: "--font-roboto",
+  variable: "--font-inter",
 });
 
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
+});
+
+const oregano = Oregano({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-oregano",
 });
 
 export default function RootLayout({
@@ -27,7 +33,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${roboto.variable} ${poppins.variable}`}>
+      <body
+        className={`${poppins.variable} ${inter.variable} ${oregano.variable}`}
+      >
         <Providers>
           <Header />
           {children}

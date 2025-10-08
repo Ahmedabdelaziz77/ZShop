@@ -10,6 +10,8 @@ import {
   getShopProducts,
   deleteProduct,
   restoreProduct,
+  getStripeAccount,
+  getAllProducts,
 } from "../controllers/productController";
 import isAuthenticated from "packages/middleware/isAuthenticated";
 
@@ -31,4 +33,7 @@ router.post("/create-product", isAuthenticated, createProduct);
 router.get("/get-shop-products", isAuthenticated, getShopProducts);
 router.delete("/delete-product/:productId", isAuthenticated, deleteProduct);
 router.put("/restore-product/:productId", isAuthenticated, restoreProduct);
+router.get("/get-stripe-account", isAuthenticated, getStripeAccount);
+router.get("/get-all-products", getAllProducts);
+
 export default router;

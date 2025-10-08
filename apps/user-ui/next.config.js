@@ -10,6 +10,14 @@ const nextConfig = {
   // Use this to set Nx-specific options
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
+  images: {
+    domains: ["ik.imagekit.io", "cdn-icons-png.flaticon.com"],
+    remotePatterns: [
+      {
+        hostname: "ik.imagekit.io",
+      },
+    ],
+  },
 };
 
 const plugins = [

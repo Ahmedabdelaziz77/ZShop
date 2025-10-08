@@ -29,7 +29,7 @@ export default function HeaderBottom() {
     <div
       className={`w-full transition-all duration-300 ${
         isSticky
-          ? "fixed top-0 left-0 z-100 bg-white shadow-lg pb-[2px]"
+          ? "fixed top-0 left-0 z-[200] bg-white shadow-lg pb-[2px]"
           : "relative"
       }`}
     >

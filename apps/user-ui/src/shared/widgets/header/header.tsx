@@ -10,6 +10,7 @@ import { HeartIcon } from "../../../assets/svg/heart-icon";
 import { CartIcon } from "../../../assets/svg/cart-icon";
 import useUser from "apps/user-ui/src/hooks/useUser";
 import Loader from "../../components/Loader";
+import Image from "next/image";
 
 export default function Header() {
   const { user, isLoading } = useUser();
@@ -19,7 +20,8 @@ export default function Header() {
         {/* LOGO */}
         <div>
           <Link href={"/"}>
-            <span className="text-3xl font-[500]">Zshop</span>
+            {/* <span className="text-3xl font-[500]">Zshop</span> */}
+            <Image src={"/logo.png"} alt="logo" width={100} height={100} />
           </Link>
         </div>
         {/* SEARCHING FOR PRODUCTS */}
