@@ -11,12 +11,16 @@ import { CartIcon } from "../../../assets/svg/cart-icon";
 import { HeartIcon } from "../../../assets/svg/heart-icon";
 import { ProfileIcon } from "../../../assets/svg/profile-icon";
 import Loader from "../../components/Loader";
+import { useStore } from "apps/user-ui/src/store";
 
 export default function HeaderBottom() {
   const [show, setShow] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
 
   const { user, isLoading } = useUser();
+
+  const wishlist = useStore((state: any) => state.wishlist);
+  const cart = useStore((state: any) => state.cart);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -111,13 +115,17 @@ export default function HeaderBottom() {
                 <Link href={"/wishlist"} className="relative">
                   <HeartIcon />
                   <div className="w-6 h-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
-                    <span className="text-white font-medium text-sm">0</span>
+                    <span className="text-white font-medium text-sm">
+                      {wishlist?.length}
+                    </span>
                   </div>
                 </Link>
                 <Link href={"/cart"} className="relative">
                   <CartIcon />
                   <div className="w-6 h-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
-                    <span className="text-white font-medium text-sm">0</span>
+                    <span className="text-white font-medium text-sm">
+                      {cart?.length}
+                    </span>
                   </div>
                 </Link>
               </div>

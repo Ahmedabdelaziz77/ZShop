@@ -12,6 +12,7 @@ module.exports = {
         Poppins: ["var(--font-poppins)"],
         Inter: ["var(--font-inter)"],
         Oregano: ["var(--font-oregano)"],
+        jost: ["var(--font-jost)"],
       },
     },
   },

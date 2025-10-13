@@ -5,6 +5,10 @@ import Rating from "../ratings";
 import { Heart, MapPin, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { CartIcon } from "apps/user-ui/src/assets/svg/cart-icon";
+import useLocationTracking from "apps/user-ui/src/hooks/useLocationTracking";
+import useDeviceTracking from "apps/user-ui/src/hooks/useDeviceTracking";
+import { useStore } from "apps/user-ui/src/store";
+import useUser from "apps/user-ui/src/hooks/useUser";
 
 interface ProductDetailsCardProps {
   product: any;
@@ -25,6 +29,21 @@ export default function ProductDetailsCard({
 
   const estimatedDelivery = new Date();
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 5);
+
+  const user = useUser();
+  const location = useLocationTracking();
+  const deviceInfo = useDeviceTracking();
+
+  const addToCart = useStore((state: any) => state.addToCart);
+
+  const addToWishlist = useStore((state: any) => state.addToWishlist);
+  const removeFromWishlist = useStore((state: any) => state.removeFromWishlist);
+
+  const wishlist = useStore((state: any) => state.wishlist);
+  const cart = useStore((state: any) => state.cart);
+
+  const isWishlisted = wishlist.some((item: any) => item.id === product.id);
+  const isInCart = cart.some((item: any) => item.id === product.id);
 
   return (
     <div
@@ -55,7 +74,6 @@ export default function ProductDetailsCard({
               className="rounded-lg object-contain h-[400px] w-[400px] transition-transform duration-300 hover:scale-105 animate-float"
             />
 
-            {/* ✅ Thumbnails in row with wrap, no scroll */}
             <div className="flex flex-wrap gap-2 justify-center mt-4 max-w-[400px]">
               {product?.images?.map((image: any, i: number) => (
                 <div
@@ -79,7 +97,6 @@ export default function ProductDetailsCard({
             </div>
           </div>
 
-          {/* ✅ RIGHT SIDE WITH COLORS & SIZES */}
           <div className="w-full md:w-1/2 flex flex-col gap-4 animate-fadeUp">
             {/* Shop Info */}
             <div className="border-b pb-3 border-gray-200 flex items-center justify-between relative">
@@ -199,12 +216,41 @@ export default function ProductDetailsCard({
 
             {/* Buttons */}
             <div className="flex items-center gap-4">
-              <button className="flex items-center gap-2 px-5 py-2 bg-[#ff5722] hover:bg-[#e64a19] text-white rounded-lg font-medium transition relative overflow-hidden">
-                <span className="absolute inset-0 bg-white/20 animate-shine"></span>
+              <button
+                disabled={isInCart}
+                onClick={() =>
+                  !isInCart &&
+                  addToCart(
+                    { ...product, quantity: 1 },
+                    user,
+                    location,
+                    deviceInfo
+                  )
+                }
+                className={`flex items-center gap-2 px-5 py-2 bg-[#ff5722] hover:bg-[#e64a19] text-white rounded-lg font-medium transition relative overflow-hidden ${
+                  isInCart ? "cursor-auto" : "cursor-pointer"
+                }`}
+              >
+                <span className="absolute inset-0 bg-white/20 animate-shine" />
                 <CartIcon size={18} /> Add to Cart
               </button>
 
-              <Heart size={30} fill="red" />
+              <Heart
+                onClick={() =>
+                  isWishlisted
+                    ? removeFromWishlist(product.id, user, location, deviceInfo)
+                    : addToWishlist(
+                        { ...product, quantity: 1 },
+                        user,
+                        location,
+                        deviceInfo
+                      )
+                }
+                className="opacity-[.7] cursor-pointer"
+                size={30}
+                fill={isWishlisted ? "red" : "transparent"}
+                stroke={isWishlisted ? "red" : "#4B5563"}
+              />
             </div>
 
             <span

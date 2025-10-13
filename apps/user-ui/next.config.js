@@ -11,7 +11,7 @@ const nextConfig = {
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
   images: {
-    domains: ["ik.imagekit.io", "cdn-icons-png.flaticon.com"],
+    domains: ["ik.imagekit.io", "cdn-icons-png.flaticon.com", "placehold.co"],
     remotePatterns: [
       {
         hostname: "ik.imagekit.io",
