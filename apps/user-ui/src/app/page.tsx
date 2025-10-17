@@ -53,7 +53,11 @@ export default function page() {
         {!isLoading && !isError && (
           <div className="m-auto grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 gap-5">
             {products?.map((product: any) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                isEvent={product.starting_date}
+              />
             ))}
           </div>
         )}
