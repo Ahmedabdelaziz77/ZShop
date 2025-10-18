@@ -18,6 +18,7 @@ import {
   getFilteredShops,
   searchProducts,
   getTopShops,
+  getAllEvents,
 } from "../controllers/productController";
 import isAuthenticated from "packages/middleware/isAuthenticated";
 
@@ -43,6 +44,7 @@ router.put("/restore-product/:productId", isAuthenticated, restoreProduct);
 router.get("/get-stripe-account", isAuthenticated, getStripeAccount);
 
 router.get("/get-all-products", getAllProducts);
+router.get("/get-all-events", getAllEvents);
 router.get("/get-product/:slug", getProductDetails);
 router.get("/get-filtered-products", getFilteredProducts);
 
