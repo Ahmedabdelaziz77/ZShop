@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import useUser from "apps/user-ui/src/hooks/useUser";
 import QuickActionCard from "apps/user-ui/src/shared/components/cards/quick-action-card";
@@ -27,13 +28,22 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function Page() {
+  return (
+    <Suspense
+      fallback={<div className="flex justify-center p-10">Loading...</div>}
+    >
+      <ProfileContent />
+    </Suspense>
+  );
+}
+
+function ProfileContent() {
   const router = useRouter();
   const queryClient = useQueryClient();
-
   const { user, isLoading } = useUser();
+
   const searchParams = useSearchParams();
   const queryTab = searchParams.get("active") || "Profile";
   const [activeTab, setActiveTab] = useState(queryTab);
@@ -47,7 +57,7 @@ export default function Page() {
   }, [activeTab]);
 
   const logOutHandler = async () => {
-    await axiosInstance.get("/api/logout").then((res) => {
+    await axiosInstance.get("/api/logout").then(() => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
       router.push("/login");
     });
@@ -69,15 +79,15 @@ export default function Page() {
             👋
           </h1>
         </div>
-        {/* PROFILE */}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           <StatCard title="Total Orders" count={10} Icon={Clock} />
           <StatCard title="Processing Orders" count={3} Icon={Truck} />
           <StatCard title="Completed Orders" count={4} Icon={CheckCircle} />
         </div>
-        {/* SIDEBAR */}
+
         <div className="mt-10 flex flex-col md:flex-row gap-6">
-          {/* LEFT NAV*/}
+          {/* LEFT NAV */}
           <div className="bg-white p-4 rounded-md shadow-md border border-gray-100 w-full md:w-1/5">
             <nav className="space-y-2">
               <NavItem
@@ -120,11 +130,12 @@ export default function Page() {
                 label="Logout"
                 Icon={LogOut}
                 danger
-                onClick={() => logOutHandler()}
+                onClick={logOutHandler}
               />
             </nav>
           </div>
-          {/* RIGHT - MAIN CONTENT */}
+
+          {/* MAIN CONTENT */}
           <div className="bg-white p-6 rounded-md shadow-sm border border-gray-100 w-full md:w-[55%]">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               {activeTab}
@@ -164,11 +175,10 @@ export default function Page() {
               </div>
             ) : activeTab === "Shipping Address" ? (
               <ShippingAddressSection />
-            ) : (
-              <></>
-            )}
+            ) : null}
           </div>
-          {/*  QUICK PANEL */}
+
+          {/* QUICK PANEL */}
           <div className="w-full md:w-1/4 space-y-4">
             <QuickActionCard
               Icon={Gift}
