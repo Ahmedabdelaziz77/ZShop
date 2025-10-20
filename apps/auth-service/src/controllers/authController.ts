@@ -13,7 +13,11 @@ import {
   verifyOtp,
 } from "../utils/authHelper";
 import prisma from "@packages/libs/prisma";
-import { AuthError, ValidationError } from "@packages/error-handler";
+import {
+  AuthError,
+  NotFoundError,
+  ValidationError,
+} from "@packages/error-handler";
 import { setCookie } from "../utils/cookies/setCookie";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -459,5 +463,145 @@ export const getSeller = async (
     });
   } catch (err) {
     next(err);
+  }
+};
+
+export const logout = async (req: any, res: Response, next: NextFunction) => {
+  try {
+    let role = req.role;
+
+    if (!role) {
+      if (
+        req.cookies["seller-access-token"] ||
+        req.cookies["seller-refresh-token"]
+      ) {
+        role = "seller";
+      } else if (req.cookies["access_token"] || req.cookies["refresh_token"]) {
+        role = "user";
+      }
+    }
+
+    if (!role)
+      return next(
+        new ValidationError("Unable to detect account type for logout.")
+      );
+
+    if (role === "seller") {
+      res.clearCookie("seller-access-token");
+      res.clearCookie("seller-refresh-token");
+    } else if (role === "user") {
+      res.clearCookie("access_token");
+      res.clearCookie("refresh_token");
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `${role} logged out successfully.`,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const addUserAddress = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?.id;
+    const { label, name, street, city, zip, country, isDefault } = req.body;
+    if (!label || !name || !street || !city || !zip || !country)
+      return next(new ValidationError("All fields are required!"));
+
+    if (isDefault)
+      await prisma.address.updateMany({
+        where: {
+          userId,
+          isDefault: true,
+        },
+        data: {
+          isDefault: false,
+        },
+      });
+
+    const newAddress = await prisma.address.create({
+      data: {
+        userId,
+        label,
+        name,
+        street,
+        city,
+        zip,
+        country,
+        isDefault,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      address: newAddress,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const deleteUserAddress = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?.id;
+    const { addressId } = req.params;
+
+    if (!addressId) return next(new ValidationError("Address Id is required!"));
+
+    const existingAddress = await prisma.address.findFirst({
+      where: {
+        id: addressId,
+        userId,
+      },
+    });
+
+    if (!existingAddress)
+      return next(new NotFoundError("Address not found or unauthorized!"));
+
+    await prisma.address.delete({
+      where: {
+        id: addressId,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Address deleted successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserAddresses = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?.id;
+    const addresses = await prisma.address.findMany({
+      where: { userId },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      addresses,
+    });
+  } catch (err) {
+    return next(err);
   }
 };
