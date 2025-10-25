@@ -9,16 +9,39 @@ import { useStore } from "apps/user-ui/src/store";
 import axiosInstance from "apps/user-ui/src/utils/axiosInstance";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function Cart() {
-  const [loading, _setLoading] = useState(false);
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [discountedProductId, _setDiscountedProductId] = useState("");
   const [discountPercent, _setDiscountPercent] = useState(0);
   const [discountAmount, _setDiscountAmount] = useState(0);
   const [couponCode, setCouponCode] = useState("");
   const [selectedAddressId, setSelectedAddressId] = useState("");
+
+  const createPaymentSession = async () => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.post(
+        "/order/api/create-payment-session",
+        {
+          cart,
+          selectedAddressId,
+          coupon: {},
+        }
+      );
+      const sessionId = res.data.sessionId;
+      router.push(`/checkout?sessionId=${sessionId}`);
+    } catch (err) {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const { user } = useUser();
   const location = useLocationTracking();
@@ -269,6 +292,7 @@ export default function Cart() {
                   <span>${(subTotal - discountAmount).toFixed(2)}</span>
                 </div>
                 <button
+                  onClick={createPaymentSession}
                   className="w-full flex items-center justify-center gap-2 bg-black cursor-pointer text-white rounded-md hover:bg-gray-900 transition-all px-4 py-2"
                   disabled={loading}
                 >

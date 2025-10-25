@@ -371,9 +371,9 @@ export const createStripeConnectLink = async (
     const acc = await stripe.accounts.create({
       type: "express",
       email: seller.email,
-      country: "AE", // fallback
+      country: "US", // fallback
       capabilities: {
-        // card_payments: { requested: true },
+        card_payments: { requested: true },
         transfers: { requested: true },
       },
     });

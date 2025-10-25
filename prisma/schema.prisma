@@ -211,14 +211,7 @@ model shopFollowers {
   @@unique([shopId, userId])
 }
 
-enum orderStatus {
-  PENDING
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  REFUNDED
-}
+
 
 model orderItems {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -242,7 +235,7 @@ model orders {
   shippingAddressId String?
   couponCode String?
   discountAmount Float?
-  status        orderStatus @default(PENDING)
+  status        String @default("shipped")
   deliveryStatus String @default("Ordered")
   items orderItems[] @relation("OrderItemsRelation")
 
@@ -271,10 +264,14 @@ model address {
   updatedAt DateTime @updatedAt
 }
 
-// model notifications{
-//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-//   creatorId String @db.ObjectId
-//   recieverId String
-//   redirect_link String?
-//   title String
-// }
+model notifications{
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  creatorId String @db.ObjectId
+  receiverId String
+  redirect_link String?
+  title String
+  message String
+  isRead Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

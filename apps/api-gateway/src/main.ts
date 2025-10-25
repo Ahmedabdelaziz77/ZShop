@@ -51,6 +51,7 @@ app.use(
     },
   })
 );
+app.use("/order", proxy("http://localhost:6004"));
 app.use("/", proxy("http://localhost:6001"));
 
 const port = process.env.PORT || 8080;
