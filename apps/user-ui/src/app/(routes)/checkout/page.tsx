@@ -1,11 +1,11 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
 import { loadStripe, Appearance, Stripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import axiosInstance from "apps/user-ui/src/utils/axiosInstance";
 import { XCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import CheckoutForm from "apps/user-ui/src/shared/components/checkout/CheckoutForm";
 
 type Coupon = null | {
@@ -15,7 +15,7 @@ type Coupon = null | {
   code?: string;
 };
 
-export default function Page() {
+function CheckoutContent() {
   const [clientSecret, setClientSecret] = useState("");
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [coupon, setCoupon] = useState<Coupon>(null);
@@ -137,5 +137,19 @@ export default function Page() {
         />
       </Elements>
     )
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[70vh] flex items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 }
