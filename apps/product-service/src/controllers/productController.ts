@@ -290,6 +290,32 @@ export const getShopProducts = async (
   }
 };
 
+export const getShopEvents = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const shopId = req?.seller?.shop?.id;
+    if (!shopId)
+      return next(new AuthError("Only seller can view shop events."));
+
+    const events = await prisma.products.findMany({
+      where: {
+        shopId,
+        isDeleted: { not: true },
+        OR: [{ starting_date: { not: null } }, { ending_date: { not: null } }],
+      },
+      include: { images: true },
+      orderBy: [{ starting_date: "asc" }, { updatedAt: "desc" }],
+    });
+
+    return res.status(200).json({ success: true, events });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const deleteProduct = async (
   req: any,
   res: Response,
@@ -930,5 +956,135 @@ export const getTopShops = async (
     return res.status(200).json({ shops: top10Shops });
   } catch (err) {
     return next(err);
+  }
+};
+
+export const createEvent = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const {
+      title,
+      short_description,
+      detailed_description,
+      warranty,
+      custom_specifications,
+      slug,
+      tags,
+      cash_on_delivery,
+      brand,
+      video_url,
+      category,
+      colors = [],
+      sizes = [],
+      discountCodes = [],
+      stock,
+      sale_price,
+      regular_price,
+      subCategory,
+      custom_properties = {},
+      images = [],
+      starting_date,
+      ending_date,
+    } = req.body;
+    if (
+      !title ||
+      !short_description ||
+      !detailed_description ||
+      !warranty ||
+      !slug ||
+      !tags ||
+      !cash_on_delivery ||
+      !brand ||
+      !category ||
+      !stock ||
+      !sale_price ||
+      !regular_price ||
+      !subCategory ||
+      !images ||
+      images.length === 0 ||
+      !starting_date ||
+      !ending_date
+    )
+      return next(new ValidationError("Missing required fields!"));
+
+    if (!req.seller.id)
+      return next(new AuthError("Only seller can create products!"));
+
+    const slugChecking = await prisma.products.findUnique({
+      where: { slug },
+    });
+
+    if (slugChecking)
+      return next(
+        new ValidationError("Slug already exist! Please use a different slug!")
+      );
+
+    const parseIsoOrNull = (v: any) => (v ? new Date(v) : null);
+
+    const startAt = parseIsoOrNull(starting_date);
+    const endAt = parseIsoOrNull(ending_date);
+
+    if (startAt && isNaN(startAt.getTime())) {
+      return next(
+        new ValidationError("starting_date must be a valid ISO datetime.")
+      );
+    }
+    if (endAt && isNaN(endAt.getTime())) {
+      return next(
+        new ValidationError("ending_date must be a valid ISO datetime.")
+      );
+    }
+    if (startAt && endAt && endAt <= startAt) {
+      return next(
+        new ValidationError("ending_date must be after starting_date.")
+      );
+    }
+
+    const newProduct = await prisma.products.create({
+      data: {
+        title,
+        short_description,
+        detailed_description,
+        warranty,
+        cashOnDelivery: cash_on_delivery,
+        slug,
+        shopId: req.seller?.shop?.id,
+        tags: Array.isArray(tags) ? tags : tags.split(","),
+        brand,
+        video_url,
+        category,
+        subCategory,
+        colors: colors || [],
+        discount_codes: discountCodes.map((discount: string) => discount),
+        sizes: sizes || [],
+        stock: parseInt(stock),
+        sale_price: parseFloat(sale_price),
+        regular_price: parseFloat(regular_price),
+        custom_properties: custom_properties || {},
+        custom_specifications: custom_specifications || [],
+        starting_date: startAt,
+        ending_date: endAt,
+        images: {
+          create: images
+            .filter((image: any) => image && image.fileId && image.file_url)
+            .map((image: any) => ({
+              file_id: image.fileId,
+              url: image.file_url,
+              productsId: undefined,
+            })),
+        },
+      },
+      include: { images: true },
+    });
+
+    res.status(201).json({
+      success: true,
+      newProduct,
+    });
+  } catch (err) {
+    next(err);
   }
 };

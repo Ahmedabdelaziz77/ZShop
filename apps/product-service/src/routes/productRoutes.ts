@@ -19,8 +19,11 @@ import {
   searchProducts,
   getTopShops,
   getAllEvents,
+  createEvent,
+  getShopEvents,
 } from "../controllers/productController";
 import isAuthenticated from "packages/middleware/isAuthenticated";
+import { isSeller } from "packages/middleware/authorizeRoles";
 
 const router: Router = express.Router();
 
@@ -36,8 +39,10 @@ router.delete(
 router.post("/upload-product-image", isAuthenticated, uploadProductImage);
 router.delete("/delete-product-image", isAuthenticated, deleteProductImage);
 
-router.post("/create-product", isAuthenticated, createProduct);
+router.post("/create-product", isAuthenticated, isSeller, createProduct);
+router.post("/create-event", isAuthenticated, isSeller, createEvent);
 router.get("/get-shop-products", isAuthenticated, getShopProducts);
+router.get("/get-shop-events", isAuthenticated, getShopEvents);
 router.delete("/delete-product/:productId", isAuthenticated, deleteProduct);
 router.put("/restore-product/:productId", isAuthenticated, restoreProduct);
 
