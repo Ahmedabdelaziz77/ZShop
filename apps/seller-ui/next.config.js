@@ -11,7 +11,7 @@ const nextConfig = {
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
   images: {
-    domains: ["ik.imagekit.io"],
+    domains: ["ik.imagekit.io", "images.unsplash.com"],
     remotePatterns: [
       {
         hostname: "ik.imagekit.io",
