@@ -649,3 +649,14 @@ export const createOrder = async (
     return next(err);
   }
 };
+
+export const getSellerOrders = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+  } catch (err) {
+    return next(err);
+  }
+};

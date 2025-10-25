@@ -1,8 +1,8 @@
 "use client";
 
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useStore } from "apps/user-ui/src/store";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
 import confetti from "canvas-confetti";
 import axiosInstance from "apps/user-ui/src/utils/axiosInstance";
 import {
@@ -13,7 +13,7 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = useMemo(
     () => searchParams.get("sessionId") || "12424124",
@@ -55,9 +55,7 @@ export default function PaymentSuccessPage() {
       try {
         const res = await axiosInstance.post(
           "order/api/create-order",
-          {
-            sessionId,
-          },
+          { sessionId },
           { withCredentials: true }
         );
 
@@ -91,9 +89,7 @@ export default function PaymentSuccessPage() {
   return (
     <div className="min-h-[80vh] w-full flex items-center justify-center px-4 py-12 bg-gradient-to-b from-green-50 to-white">
       <div className="w-full max-w-xl">
-        {/* Card */}
         <div className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
-          {/* Header */}
           <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-6 text-white">
             <div className="flex items-center gap-3">
               <div className="bg-white/15 rounded-full p-2">
@@ -118,9 +114,7 @@ export default function PaymentSuccessPage() {
             </div>
           </div>
 
-          {/* Body */}
           <div className="p-6">
-            {/* Next steps */}
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
               <li className="flex items-start gap-3 rounded-xl border border-gray-200 p-3">
                 <div className="mt-0.5">
@@ -150,7 +144,6 @@ export default function PaymentSuccessPage() {
               </li>
             </ul>
 
-            {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => router.push("/profile?active=My+Orders")}
@@ -166,10 +159,8 @@ export default function PaymentSuccessPage() {
               </button>
             </div>
 
-            {/* Divider */}
             <div className="my-6 h-px bg-gray-100" />
 
-            {/* Session ID with copy */}
             <div className="flex items-center justify-between gap-3">
               <div className="text-xs text-gray-500">
                 <span className="block text-gray-400">Payment Session ID</span>
@@ -181,7 +172,6 @@ export default function PaymentSuccessPage() {
                 <button
                   onClick={onCopy}
                   className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/50"
-                  aria-label="Copy session ID"
                 >
                   {copied ? (
                     <>
@@ -209,5 +199,19 @@ export default function PaymentSuccessPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[60vh] flex items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }
