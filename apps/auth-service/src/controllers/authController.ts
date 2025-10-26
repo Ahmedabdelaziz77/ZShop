@@ -255,6 +255,11 @@ export const registerSeller = async (
     validateRegisterationData(req.body, "seller");
     const { name, email } = req.body;
 
+    const blocked = await prisma.blocked_seller_emails.findUnique({
+      where: { email },
+    });
+    if (blocked) return next(new ValidationError("This email is blocked."));
+
     const existingSeller = await prisma.sellers.findUnique({
       where: { email },
     });

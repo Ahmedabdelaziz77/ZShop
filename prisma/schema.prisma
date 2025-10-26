@@ -70,6 +70,7 @@ model shops {
   products      products[]
   followers     shopFollowers[]
   orders        orders[]
+
 }
 
 model sellers {
@@ -274,4 +275,24 @@ model notifications{
   isRead Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model shop_settings {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  shopId    String   @unique @db.ObjectId
+
+  lowStockThreshold Int  @default(10)
+  notifications     Json @default("{\"email\":true,\"web\":true,\"app\":false}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
+model blocked_seller_emails {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  sellerId  String?  @db.ObjectId
+  reason    String?
+  createdAt DateTime @default(now())
 }

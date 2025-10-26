@@ -10,7 +10,6 @@ import {
   getShopProducts,
   deleteProduct,
   restoreProduct,
-  getStripeAccount,
   getAllProducts,
   getProductDetails,
   getFilteredProducts,
@@ -45,8 +44,6 @@ router.get("/get-shop-products", isAuthenticated, getShopProducts);
 router.get("/get-shop-events", isAuthenticated, getShopEvents);
 router.delete("/delete-product/:productId", isAuthenticated, deleteProduct);
 router.put("/restore-product/:productId", isAuthenticated, restoreProduct);
-
-router.get("/get-stripe-account", isAuthenticated, getStripeAccount);
 
 router.get("/get-all-products", getAllProducts);
 router.get("/get-all-events", getAllEvents);

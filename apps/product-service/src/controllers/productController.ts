@@ -7,11 +7,6 @@ import {
 } from "packages/error-handler";
 import imagekit from "packages/libs/imageKit";
 import prisma from "packages/libs/prisma";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20" as any,
-});
 
 export const getCategories = async (
   req: Request,
@@ -403,74 +398,6 @@ export const restoreProduct = async (
       message: "Product successfully restored!",
     });
   } catch (err) {
-    next(err);
-  }
-};
-
-export const getStripeAccount = async (
-  req: any,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const sellerId = req?.seller?.id;
-    if (!sellerId) return next(new ValidationError("Seller ID is required!"));
-
-    const seller = await prisma.sellers.findUnique({
-      where: { id: sellerId },
-      include: { shop: true },
-    });
-
-    if (!seller) return next(new ValidationError("Seller not found!"));
-    if (!seller.stripeId)
-      return next(new ValidationError("Seller not connected to Stripe!"));
-
-    const account = await stripe.accounts.retrieve(seller.stripeId);
-
-    const balance = await stripe.balance.retrieve({
-      stripeAccount: seller.stripeId,
-    });
-    const payouts = await stripe.payouts.list(
-      { limit: 5 },
-      { stripeAccount: seller.stripeId }
-    );
-
-    return res.json({
-      success: true,
-      seller: {
-        id: seller.id,
-        name: seller.name,
-        email: seller.email,
-        phone_number: seller.phone_number,
-        country: seller.country,
-        createdAt: seller.createdAt,
-        updatedAt: seller.updatedAt,
-      },
-      shop: seller.shop
-        ? {
-            id: seller.shop.id,
-            name: seller.shop.name,
-            bio: seller.shop.bio,
-            category: seller.shop.category,
-            address: seller.shop.address,
-            ratings: seller.shop.ratings,
-            website: seller.shop.website,
-            socialLinks: seller.shop.socialLinks,
-          }
-        : null,
-      stripe: {
-        id: account.id,
-        type: account.type,
-        email: account.email,
-        country: account.country,
-        details_submitted: account.details_submitted,
-        charges_enabled: account.charges_enabled,
-        payouts_enabled: account.payouts_enabled,
-        balance: balance.available || [],
-        recent_payouts: payouts.data,
-      },
-    });
-  } catch (err: any) {
     next(err);
   }
 };
