@@ -1,8 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import useUser from "apps/user-ui/src/hooks/useUser";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import QuickActionCard from "apps/user-ui/src/shared/components/cards/quick-action-card";
 import StatCard from "apps/user-ui/src/shared/components/cards/stat-card";
 import ShippingAddressSection from "apps/user-ui/src/shared/components/shippingAddress";
@@ -28,6 +27,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
+import OrdersTable from "apps/user-ui/src/shared/components/tables/orders-table";
+import ChangePassword from "apps/user-ui/src/shared/components/changePassword";
+import useRequireAuth from "apps/user-ui/src/hooks/useRequiredAuth";
 
 export default function Page() {
   return (
@@ -42,11 +44,28 @@ export default function Page() {
 function ProfileContent() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { user, isLoading } = useUser();
+  const { user, isLoading } = useRequireAuth();
 
   const searchParams = useSearchParams();
   const queryTab = searchParams.get("active") || "Profile";
   const [activeTab, setActiveTab] = useState(queryTab);
+
+  const { data: orders = [] } = useQuery({
+    queryKey: ["user-orders"],
+    queryFn: async () => {
+      const res = await axiosInstance.get(`/order/api/get-user-orders`);
+      return res.data.orders;
+    },
+  });
+  const totalOrders = orders.length;
+  const processingOrders = orders.filter(
+    (order: any) =>
+      order?.deliveryStatus !== "Delivered" &&
+      order?.deliveryStatus !== "Cancelled"
+  ).length;
+  const completedOrders = orders.filter(
+    (order: any) => order?.deliveryStatus === "Delivered"
+  ).length;
 
   useEffect(() => {
     if (activeTab !== queryTab) {
@@ -81,9 +100,17 @@ function ProfileContent() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <StatCard title="Total Orders" count={10} Icon={Clock} />
-          <StatCard title="Processing Orders" count={3} Icon={Truck} />
-          <StatCard title="Completed Orders" count={4} Icon={CheckCircle} />
+          <StatCard title="Total Orders" count={totalOrders} Icon={Clock} />
+          <StatCard
+            title="Processing Orders"
+            count={processingOrders}
+            Icon={Truck}
+          />
+          <StatCard
+            title="Completed Orders"
+            count={completedOrders}
+            Icon={CheckCircle}
+          />
         </div>
 
         <div className="mt-10 flex flex-col md:flex-row gap-6">
@@ -175,7 +202,13 @@ function ProfileContent() {
               </div>
             ) : activeTab === "Shipping Address" ? (
               <ShippingAddressSection />
-            ) : null}
+            ) : activeTab === "My Orders" ? (
+              <OrdersTable />
+            ) : activeTab === "Change Password" ? (
+              <ChangePassword />
+            ) : (
+              <></>
+            )}
           </div>
 
           {/* QUICK PANEL */}

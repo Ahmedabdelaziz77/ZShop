@@ -1,3 +1,4 @@
+import { Toaster } from "react-hot-toast";
 import "./global.css";
 import Providers from "./providers";
 import { Poppins } from "next/font/google";
@@ -23,6 +24,47 @@ export default function RootLayout({
         className={`min-h-screen bg-slate-900 font-sans antialiased ${poppins.variable}`}
       >
         <Providers>{children}</Providers>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            className:
+              "rounded-lg shadow-xl border border-gray-200 font-medium text-sm backdrop-blur-sm",
+            style: {
+              background: "white",
+              color: "#111",
+              padding: "12px 16px",
+              maxWidth: "350px",
+            },
+            success: {
+              iconTheme: {
+                primary: "#0ea5e9",
+                secondary: "#e0f2fe",
+              },
+              style: {
+                borderLeft: "4px solid #0ea5e9",
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: "#ef4444",
+                secondary: "#fee2e2",
+              },
+              style: {
+                borderLeft: "4px solid #ef4444",
+              },
+            },
+            loading: {
+              iconTheme: {
+                primary: "#facc15",
+                secondary: "#fef9c3",
+              },
+              style: {
+                borderLeft: "4px solid #facc15",
+              },
+            },
+            duration: 4000,
+          }}
+        />
       </body>
     </html>
   );
