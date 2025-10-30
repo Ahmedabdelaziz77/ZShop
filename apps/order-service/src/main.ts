@@ -5,9 +5,9 @@ import bodyParser from "body-parser";
 
 import { errorMiddelware } from "packages/error-handler/error-middleware";
 
-import swaggerUi from "swagger-ui-express";
 import router from "./routes/orderRoutes";
-import { createOrder } from "./controller/orderController";
+import { createOrder } from "./controllers/orderController";
+import swaggerUi from "swagger-ui-express";
 const swaggerDocument = require("./swagger-output.json");
 
 const app = express();

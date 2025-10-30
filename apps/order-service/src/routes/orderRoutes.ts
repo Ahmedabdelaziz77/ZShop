@@ -11,7 +11,7 @@ import {
   updateDeliveryStatus,
   verifyCouponCode,
   verifyPaymentSession,
-} from "../controller/orderController";
+} from "../controllers/orderController";
 import { isSeller } from "packages/middleware/authorizeRoles";
 
 const router: Router = express.Router();

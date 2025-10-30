@@ -3,8 +3,6 @@ import cors from "cors";
 import proxy from "express-http-proxy";
 import morgan from "morgan";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
-// import swaggerUi from "swagger-ui-express";
-// import axios from "axios";
 import cookieParser from "cookie-parser";
 import initializeSiteConfig from "./libs/initializeSiteConfig";
 
@@ -12,7 +10,11 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:3002",
+    ],
     allowedHeaders: ["Authorization", "Content-Type"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -39,6 +41,7 @@ app.get("/gateway-health", (req, res) => {
   res.send({ message: "Welcome to api-gateway!" });
 });
 
+app.use("/", proxy("http://localhost:6001"));
 app.use(
   "/product",
   proxy("http://localhost:6002", {
@@ -53,7 +56,7 @@ app.use(
 );
 app.use("/seller", proxy("http://localhost:6003"));
 app.use("/order", proxy("http://localhost:6004"));
-app.use("/", proxy("http://localhost:6001"));
+app.use("/admin", proxy("http://localhost:6005"));
 
 const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {

@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 import isAuthenticated from "../../../../packages/middleware/isAuthenticated";
 import {
+  isAdmin,
   isSeller,
   isUser,
 } from "../../../../packages/middleware/authorizeRoles";
@@ -9,9 +10,11 @@ import {
   createShop,
   createStripeConnectLink,
   deleteUserAddress,
+  getAdmin,
   getSeller,
   getUser,
   getUserAddresses,
+  loginAdmin,
   loginSeller,
   loginUser,
   logout,
@@ -49,6 +52,10 @@ router.post("/add-address", isAuthenticated, addUserAddress);
 router.delete("/delete-address/:addressId", isAuthenticated, deleteUserAddress);
 
 router.post("/change-password", isAuthenticated, updateUserPassword);
+
+router.post("/login-admin", loginAdmin);
+router.get("/logged-in-admin", isAuthenticated, isAdmin, getAdmin);
+
 router.get("/logout", isAuthenticated, logout);
 
 export default router;

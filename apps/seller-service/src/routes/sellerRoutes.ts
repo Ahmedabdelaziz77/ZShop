@@ -9,7 +9,7 @@ import {
   getStripeAccount,
   restoreSeller,
   updateShopSettings,
-} from "../controller/sellerController";
+} from "../controllers/sellerController";
 
 const router: Router = express.Router();
 
