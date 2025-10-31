@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function BreadCrumbs({ title }: { title: string }) {
   return (
     <nav
-      className="w-full flex items-center text-sm text-gray-300 space-x-1 md:space-x-2 font-medium select-none"
+      className="w-full flex items-center text-sm text-gray-300 space-x-1 md:space-x-2 font-medium select-none mb-6"
       aria-label="Breadcrumb"
     >
       <Link

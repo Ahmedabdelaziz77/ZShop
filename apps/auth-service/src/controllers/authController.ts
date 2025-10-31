@@ -100,6 +100,14 @@ export const loginUser = async (
     const user = await prisma.users.findUnique({ where: { email } });
     if (!user) return next(new AuthError("User doesn't exist!"));
 
+    if (user.isBanned) {
+      return res.status(403).json({
+        message: "Your account has been banned!",
+        bannedAt: user.bannedAt,
+        reason: user.banReason,
+      });
+    }
+
     const isMatching = await bcrypt.compare(password, user.password!);
     if (!isMatching) return next(new AuthError("Invalid Email or Password!"));
 
@@ -419,6 +427,20 @@ export const loginSeller = async (
     const seller = await prisma.sellers.findUnique({ where: { email } });
     if (!seller) return next(new ValidationError("Invalid email or password!"));
 
+    const blocked = await prisma.blocked_seller_emails.findUnique({
+      where: { email },
+    });
+
+    if (blocked) {
+      return next(
+        new ValidationError(
+          `Access denied: this seller account has been blocked.${
+            blocked.reason ? " Reason: " + blocked.reason : ""
+          }`
+        )
+      );
+    }
+
     const isMatch = await bcrypt.compare(password, seller.password);
     if (!isMatch)
       return next(new ValidationError("Invalid email or password!"));
@@ -690,6 +712,13 @@ export const loginAdmin = async (
 
     if (!user) return next(new AuthError("User doesn't exist!"));
 
+    if (user.isBanned) {
+      return res.status(403).json({
+        message: "Your account has been banned!",
+        bannedAt: user.bannedAt,
+        reason: user.banReason,
+      });
+    }
     const isMatch = await bcrypt.compare(password, user.password!);
     if (!isMatch) return next(new AuthError("Invalid email or password"));
 

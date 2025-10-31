@@ -36,6 +36,10 @@ model users {
   shopReviews shopReviews[]
   followings shopFollowers[]
   orders      orders[]
+
+  isBanned    Boolean          @default(false)
+  bannedAt    DateTime?
+  banReason   String?
 }
 
 model shopReviews {
