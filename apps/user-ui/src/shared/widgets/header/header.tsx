@@ -10,8 +10,10 @@ import { HeartIcon } from "../../../assets/svg/heart-icon";
 import { CartIcon } from "../../../assets/svg/cart-icon";
 import useUser from "apps/user-ui/src/hooks/useUser";
 import Loader from "../../components/Loader";
-import Image from "next/image";
+
 import { useStore } from "apps/user-ui/src/store";
+
+import LogoSection from "../../components/logo";
 
 export default function Header() {
   const { user, isLoading } = useUser();
@@ -24,10 +26,7 @@ export default function Header() {
       <div className="w-[80%] py-5 m-auto flex items-center justify-between">
         {/* LOGO */}
         <div>
-          <Link href={"/"}>
-            {/* <span className="text-3xl font-[500]">Zshop</span> */}
-            <Image src={"/logo.png"} alt="logo" width={100} height={100} />
-          </Link>
+          <LogoSection />
         </div>
         {/* SEARCHING FOR PRODUCTS */}
         <div className="w-[50%] relative">

@@ -2,7 +2,7 @@
 
 import useAdmin from "apps/admin-ui/src/hooks/useAdmin";
 import useSidebar from "apps/admin-ui/src/hooks/useSidebar";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Box from "../box";
 import { Sidebar } from "./sidebar.styles";
 import Link from "next/link";
@@ -24,15 +24,27 @@ import {
 } from "lucide-react";
 import { Payment } from "apps/admin-ui/src/app/assets/icons/payment";
 import { useEffect } from "react";
+import axiosInstance from "apps/admin-ui/src/utils/axiosInstance";
+import toast from "react-hot-toast";
 
 export default function SidebarWrapper() {
   const { activeSidebar, setActiveSidebar } = useSidebar();
   const pathName = usePathname();
   const { admin } = useAdmin();
-
+  const router = useRouter();
   useEffect(() => {
     setActiveSidebar(pathName);
   }, [pathName, setActiveSidebar]);
+
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.get("/api/logout");
+      toast.success("Logged out successfully!");
+      router.push("/");
+    } catch (error) {
+      toast.error("Logout failed!");
+    }
+  };
 
   const getIconColor = (route: string) =>
     activeSidebar === route ? "#0085ff" : "#969696";
@@ -209,12 +221,13 @@ export default function SidebarWrapper() {
             {/* EXTRAS MENU */}
             <SidebarMenu title="Extras">
               {/* LOGOUT */}
-              <SidebarItem
-                title="Logout"
-                icon={<LogOut size={20} color={getIconColor("/logout")} />}
-                isActive={activeSidebar === "/logout"}
-                href="/"
-              />
+              <button
+                onClick={handleLogout}
+                className=" flex gap-2 w-full min-h-12 h-full items-center px-[13px] rounded-lg cursor-pointer transition my-2 text-left py-2  hover:bg-[#2b2f31] "
+              >
+                <LogOut size={24} color="#969696" />
+                <span className="text-lg  text-slate-200">Logout</span>
+              </button>
             </SidebarMenu>
           </div>
         </Sidebar.Body>

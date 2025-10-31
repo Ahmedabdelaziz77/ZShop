@@ -528,7 +528,7 @@ export const logout = async (req: any, res: Response, next: NextFunction) => {
     if (role === "seller") {
       res.clearCookie("seller-access-token");
       res.clearCookie("seller-refresh-token");
-    } else if (role === "user") {
+    } else {
       res.clearCookie("access_token");
       res.clearCookie("refresh_token");
     }
@@ -762,6 +762,50 @@ export const loginAdmin = async (
     res.status(200).json({
       message: "Login Successful!",
       user: { id: user.id, email: user.email, name: user.name },
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const getSiteLogo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const config = await prisma.site_configs.findFirst({
+      select: { logo: true },
+    });
+
+    if (!config || !config.logo)
+      return next(new ValidationError("Logo not found!"));
+
+    return res.status(200).json({
+      success: true,
+      logo: config.logo,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const getSiteBanner = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const config = await prisma.site_configs.findFirst({
+      select: { banner: true },
+    });
+
+    if (!config || !config.banner)
+      return next(new ValidationError("Banner not found!"));
+
+    return res.status(200).json({
+      success: true,
+      banner: config.banner,
     });
   } catch (err) {
     return next(err);

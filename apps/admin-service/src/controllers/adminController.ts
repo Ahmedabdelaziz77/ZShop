@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { AuthError, ValidationError } from "packages/error-handler";
+import imagekit from "packages/libs/imageKit";
 import prisma from "packages/libs/prisma";
 
 export const getAllProducts = async (
@@ -138,23 +139,38 @@ export const addNewAdmin = async (
   next: NextFunction
 ) => {
   try {
-    const { email, role } = req.body;
-    const isUser = await prisma.users.findUnique({
-      where: { email },
-    });
+    const { email } = req.body;
 
-    if (!isUser) return next(new ValidationError("Something went wrong!"));
+    if (!email) {
+      return next(new ValidationError("Email is required!"));
+    }
 
-    const updateRole = await prisma.users.update({
+    const user = await prisma.users.findUnique({ where: { email } });
+
+    if (!user) {
+      return next(new ValidationError("User not found!"));
+    }
+
+    if (user.role === "admin") {
+      return next(new ValidationError("User is already an admin!"));
+    }
+
+    const updatedUser = await prisma.users.update({
       where: { email },
-      data: {
-        role,
+      data: { role: "admin" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
       },
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
-      updateRole,
+      message: `${user.name} has been promoted to admin successfully.`,
+      data: updatedUser,
     });
   } catch (err) {
     return next(err);
@@ -219,6 +235,25 @@ export const getAllUsers = async (
         currentPage: page,
         totalPages,
       },
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const getAllAdmins = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const admins = await prisma.users.findMany({
+      where: { role: "admin" },
+    });
+
+    return res.status(200).json({
+      success: true,
+      admins,
     });
   } catch (err) {
     return next(err);
@@ -340,6 +375,110 @@ export const unbanUser = async (
     return res.status(200).json({
       message: `${user.name} has been unbanned.`,
       user,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const getSiteConfig = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const config = await prisma.site_configs.findFirst();
+    return res.status(200).json({ success: true, data: config });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const updateCategories = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { categories, subCategories } = req.body;
+    const config = await prisma.site_configs.findFirst();
+    if (!config) return next(new ValidationError("Site config not found!"));
+
+    const updated = await prisma.site_configs.update({
+      where: { id: config.id },
+      data: { categories, subCategories },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Categories updated successfully!",
+      data: updated,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const uploadLogo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { fileName } = req.body;
+    if (!fileName) return next(new ValidationError("No file provided!"));
+
+    const uploadResponse = await imagekit.upload({
+      file: fileName,
+      fileName: `logo-${Date.now()}.jpg`,
+      folder: "/site-config/logo",
+    });
+
+    const config = await prisma.site_configs.findFirst();
+    const updated = await prisma.site_configs.update({
+      where: { id: config!.id },
+      data: { logo: uploadResponse.url },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Logo uploaded successfully!",
+      file_url: uploadResponse.url,
+      fileId: uploadResponse.fileId,
+      data: { logo: updated.logo },
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const uploadBanner = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { fileName } = req.body;
+    if (!fileName) return next(new ValidationError("No file provided!"));
+
+    const uploadResponse = await imagekit.upload({
+      file: fileName,
+      fileName: `banner-${Date.now()}.jpg`,
+      folder: "/site-config/banner",
+    });
+
+    const config = await prisma.site_configs.findFirst();
+    const updated = await prisma.site_configs.update({
+      where: { id: config!.id },
+      data: { banner: uploadResponse.url },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Banner uploaded successfully!",
+      file_url: uploadResponse.url,
+      fileId: uploadResponse.fileId,
+      data: { banner: updated.banner },
     });
   } catch (err) {
     return next(err);

@@ -12,6 +12,8 @@ import {
   deleteUserAddress,
   getAdmin,
   getSeller,
+  getSiteBanner,
+  getSiteLogo,
   getUser,
   getUserAddresses,
   loginAdmin,
@@ -57,5 +59,8 @@ router.post("/login-admin", loginAdmin);
 router.get("/logged-in-admin", isAuthenticated, isAdmin, getAdmin);
 
 router.get("/logout", isAuthenticated, logout);
+
+router.get("/get-logo", getSiteLogo);
+router.get("/get-banner", getSiteBanner);
 
 export default router;

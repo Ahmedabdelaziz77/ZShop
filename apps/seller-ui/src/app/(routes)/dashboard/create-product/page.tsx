@@ -120,7 +120,6 @@ export default function Page() {
     if (!selectedImage || processing) return;
     setProcessing(true);
     setActiveEffect(transformation);
-    console.log(selectedImage);
     try {
       const transformationUrl = `${selectedImage}?tr=${transformation}`;
       console.log(transformationUrl);
