@@ -71,6 +71,7 @@ function ProfileContent() {
     if (activeTab !== queryTab) {
       const newParams = new URLSearchParams(searchParams);
       newParams.set("active", activeTab);
+      if (activeTab === "inbox") router.replace(`/inbox`);
       router.replace(`/profile?${newParams.toString()}`);
     }
   }, [activeTab]);
@@ -133,7 +134,7 @@ function ProfileContent() {
                 label="Inbox"
                 Icon={Inbox}
                 active={activeTab === "Inbox"}
-                onClick={() => setActiveTab("Inbox")}
+                onClick={() => router.replace("/inbox")}
               />
               <NavItem
                 label="Notifications"

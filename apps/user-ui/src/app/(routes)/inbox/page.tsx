@@ -62,12 +62,56 @@ function InboxContent() {
     queryKey: ["conversations"],
     queryFn: async () => {
       const res = await axiosInstance.get(
-        "chatting/api/get-user-conversations",
+        "/chatting/api/get-user-conversations",
         isProtected
       );
       return res.data.conversations;
     },
   });
+
+  useEffect(() => {
+    if (!ws) return;
+
+    ws.onmessage = (event: any) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "NEW_MESSAGE") {
+        const newMessage = data.payload;
+        if (newMessage.conversationId === conversationId)
+          queryClient.setQueryData(
+            ["messages", conversationId],
+            (old: any = []) => [
+              ...old,
+              {
+                content: newMessage.messageBody || newMessage.content || "",
+                senderType: newMessage.senderType,
+                seen: false,
+                createdAt: newMessage.createdAt || new Date().toISOString(),
+              },
+            ]
+          );
+
+        scrollToBottom();
+        setChats((prev) =>
+          prev.map((chat) =>
+            chat.conversationId === newMessage.conversationId
+              ? { ...chat, lastMessage: newMessage.content }
+              : chat
+          )
+        );
+      }
+
+      if (data.type === "UNSEEN_COUNT_UPDATE") {
+        const { conversationId, count } = data.payload;
+        setChats((prev) =>
+          prev.map((chat) =>
+            chat.conversationId === conversationId
+              ? { ...chat, unreadCount: count }
+              : chat
+          )
+        );
+      }
+    };
+  }, [ws, conversationId]);
 
   useEffect(() => {
     if (conversations) setChats(conversations);
@@ -106,27 +150,6 @@ function InboxContent() {
     };
 
     ws?.send(JSON.stringify(payload));
-
-    queryClient.setQueryData(
-      ["messages", selectedChat?.conversationId],
-      (old: any = []) => [
-        ...old,
-        {
-          content: payload.messageBody,
-          senderType: "user",
-          seen: false,
-          createdAt: new Date().toISOString(),
-        },
-      ]
-    );
-
-    setChats((prevChats) =>
-      prevChats.map((chat) =>
-        chat.conversationId
-          ? { ...chat, lastMessage: payload.messageBody }
-          : chat
-      )
-    );
 
     setMessage("");
     scrollToBottom();
@@ -197,9 +220,16 @@ function InboxContent() {
                               <span className="w-2 h-2 rounded-full bg-green-500" />
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 truncate max-w-[170px]">
-                            {getLastMessage(c)}
-                          </p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs text-gray-500 truncate max-w-[170px]">
+                              {getLastMessage(c)}
+                            </p>
+                            {c?.unreadCount > 0 && (
+                              <span className="ml-2 text-[10px] px-2 py-[2px] rounded-full bg-blue-600 text-white">
+                                {c?.unreadCount > 9 ? "9+" : c?.unreadCount}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </button>
