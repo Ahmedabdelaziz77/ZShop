@@ -1,0 +1,14 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Chatting Service API",
+    "description": "Auto generated Swagger docs",
+    "version": "1.0.0"
+  },
+  "host": "localhost:6006",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "paths": {}
+}

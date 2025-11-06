@@ -1,10 +1,14 @@
 import express from "express";
-import cookieParser from "cookie-parser";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+
+import { createWebSocketServer } from "./websocket";
+import { startConsumer } from "./chat-message-consumer";
+
+import router from "./routes/chattingRoutes";
+import { errorMiddelware } from "packages/error-handler/error-middleware";
 import swaggerUi from "swagger-ui-express";
 const swaggerDocument = require("./swagger-output.json");
-import router from "./routes/adminRoutes";
-import { errorMiddelware } from "packages/error-handler/error-middleware";
 
 const app = express();
 
@@ -31,18 +35,24 @@ app.get("/docs-json", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send({ message: "Welcome to admin-service!" });
+  res.send({ message: "Welcome to chatting-service!" });
 });
 
 app.use("/api", router);
 app.use(errorMiddelware);
 
-const port = process.env.PORT || 6005;
-
+const port = process.env.PORT || 6006;
 const server = app.listen(port, () => {
-  console.log(`Admin service listening at http://localhost:${port}/api`);
+  console.log(`Chatting service listening at http://localhost:${port}/api`);
   console.log(`Swagger Docs available at http://localhost:${port}/api-docs`);
 });
+
+// websocket server
+createWebSocketServer(server);
+
+// start kafka consumer
+startConsumer().catch((err: any) => console.error(err));
+
 server.on("error", (err) => {
   console.log("Server Error :", err);
 });

@@ -9,6 +9,8 @@ import useLocationTracking from "apps/user-ui/src/hooks/useLocationTracking";
 import useDeviceTracking from "apps/user-ui/src/hooks/useDeviceTracking";
 import { useStore } from "apps/user-ui/src/store";
 import useUser from "apps/user-ui/src/hooks/useUser";
+import axiosInstance from "apps/user-ui/src/utils/axiosInstance";
+import { isProtected } from "apps/user-ui/src/utils/protected";
 
 interface ProductDetailsCardProps {
   product: any;
@@ -26,6 +28,7 @@ export default function ProductDetailsCard({
     product?.sizes?.[0] || ""
   );
   const [quantity, setQuantity] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   const estimatedDelivery = new Date();
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 5);
@@ -44,6 +47,24 @@ export default function ProductDetailsCard({
 
   const isWishlisted = wishlist.some((item: any) => item.id === product.id);
   const isInCart = cart.some((item: any) => item.id === product.id);
+
+  const handleChat = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+
+    try {
+      const res = await axiosInstance.post(
+        "/chatting/api/create-user-conversationGroup",
+        { sellerId: product?.shop?.sellerId },
+        isProtected
+      );
+      router.push(`/inbox?conversationId=${res?.data?.conversation.id}`);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div
@@ -127,10 +148,9 @@ export default function ProductDetailsCard({
               </div>
 
               <button
+                disabled={isLoading}
                 className="flex items-center gap-2 px-4 py-2 rounded-md text-white bg-blue-700 hover:bg-blue-600 font-medium transition"
-                onClick={() =>
-                  router.push(`/inbox?shopId=${product?.shop?.id}`)
-                }
+                onClick={() => handleChat()}
               >
                 💬 Chat
               </button>
