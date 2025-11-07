@@ -36,8 +36,9 @@ const ShopCard: React.FC<ShopCardProps> = ({ shop }) => {
           <div className="w-16 h-16 rounded-full border-4 border-white overflow-hidden shadow-lg bg-white group-hover:scale-105 transition-transform duration-300">
             <Image
               src={
-                shop?.avatar ||
-                "https://cdn-icons-png.flaticon.com/512/847/847969.png"
+                shop?.avatar
+                  ? shop?.avatar
+                  : "https://cdn-icons-png.flaticon.com/512/847/847969.png"
               }
               alt="Avatar"
               fill

@@ -14,6 +14,7 @@ const validActions = [
   "add_to_wishlist",
   "remove_from_wishlist",
   "purchase",
+  "shop_visit",
 ];
 
 const processQueue = async () => {
@@ -24,10 +25,6 @@ const processQueue = async () => {
 
   for (const event of events) {
     try {
-      if (event.action === "shop_visit") {
-        // TODO: shop analytics
-      }
-
       if (!event.action || !validActions.includes(event.action)) {
         console.warn(
           "⚠️  Skipping invalid/unknown action:",

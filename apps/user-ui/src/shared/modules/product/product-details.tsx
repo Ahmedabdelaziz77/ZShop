@@ -21,6 +21,8 @@ import useLocationTracking from "apps/user-ui/src/hooks/useLocationTracking";
 import useDeviceTracking from "apps/user-ui/src/hooks/useDeviceTracking";
 import ProductCard from "../../components/cards/product-card";
 import axiosInstance from "apps/user-ui/src/utils/axiosInstance";
+import { useRouter } from "next/navigation";
+import { isProtected } from "apps/user-ui/src/utils/protected";
 
 export default function ProductDetails({
   productDetails,
@@ -42,7 +44,10 @@ export default function ProductDetails({
     productDetails?.sale_price,
     1199,
   ]);
+  const [isLoading, setIsLoading] = useState(false);
   const [recommendedProducts, setRecommendedProducts] = useState([]);
+
+  const router = useRouter();
 
   const user = useUser();
   const location = useLocationTracking();
@@ -100,6 +105,24 @@ export default function ProductDetails({
   useEffect(() => {
     fetchFilteredProducts();
   }, [priceRange]);
+
+  const handleChat = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+
+    try {
+      const res = await axiosInstance.post(
+        "/chatting/api/create-user-conversationGroup",
+        { sellerId: productDetails?.shop?.sellerId },
+        isProtected
+      );
+      router.push(`/inbox?conversationId=${res?.data?.conversation.id}`);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="w-full bg-[#f5f5f5] py-5">
@@ -386,13 +409,14 @@ export default function ProductDetails({
                     {productDetails?.shop?.name}
                   </span>
                 </div>
-                <Link
-                  href={"#"}
+                <button
+                  disabled={isLoading}
+                  onClick={() => handleChat()}
                   className="text-blue-500 text-sm flex items-center gap-1"
                 >
                   <MessageSquareText />
                   Chat Now
-                </Link>
+                </button>
               </div>
               {/* SELLER PERFORMANCE STATS */}
               <div className="grid grid-cols-3 gap-2 border-t border-t-gray-200 mt-3 pt-3">

@@ -16,6 +16,7 @@ const nextConfig = {
       "cdn-icons-png.flaticon.com",
       "placehold.co",
       "images.unsplash.com",
+      "unsplash.com",
     ],
     remotePatterns: [
       {

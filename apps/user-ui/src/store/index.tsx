@@ -43,9 +43,6 @@ type Store = {
   ) => Promise<void> | void;
 };
 
-const TRACK_URL =
-  (process.env.NEXT_PUBLIC_TRACK_URL ?? "http://localhost:6010") + "/track";
-
 const isObjectId = (s: any) =>
   typeof s === "string" && /^[a-fA-F0-9]{24}$/.test(s);
 
@@ -69,6 +66,8 @@ function extractUserId(u: any): string | null {
   const found = candidates.find((x) => typeof x === "string");
   return isObjectId(found) ? (found as string) : null;
 }
+const TRACK_URL =
+  (process.env.NEXT_PUBLIC_TRACK_URL ?? "http://localhost:6010") + "/track";
 
 async function postTrack(payload: any) {
   const resInfo = { ok: false, status: 0, text: "" };

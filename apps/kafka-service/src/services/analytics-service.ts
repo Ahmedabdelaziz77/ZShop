@@ -78,6 +78,10 @@ export const updateUserAnalytics = async (event: any) => {
 
     // Product analytics
     await updateProductAnalytics(event);
+
+    if (event.action === "shop_visit") {
+      await updateShopAnalytics(event);
+    }
   } catch (err) {
     console.log("Error storing user analytics:", err);
   }
@@ -120,5 +124,70 @@ const updateProductAnalytics = async (event: any) => {
     });
   } catch (err) {
     console.log("Error updating product analytics:", err);
+  }
+};
+
+const updateShopAnalytics = async (event: any) => {
+  try {
+    if (!event.shopId) return;
+
+    const safeCountry = event.country || "Unknown";
+    const safeCity = event.city || "Unknown";
+    const safeDevice = event.device || "Unknown";
+
+    // Get existing analytics data
+    const analytics = await prisma.shopAnalytics.findUnique({
+      where: { shopId: event.shopId },
+    });
+
+    const incrementCount = (obj: any, key: string) => ({
+      ...(obj || {}),
+      [key]: (obj?.[key] || 0) + 1,
+    });
+
+    const updatedCountryStats = incrementCount(
+      (analytics?.countryStats as any) || {},
+      safeCountry
+    );
+    const updatedCityStats = incrementCount(
+      (analytics?.cityStats as any) || {},
+      safeCity
+    );
+    const updatedDeviceStats = incrementCount(
+      (analytics?.deviceStats as any) || {},
+      safeDevice
+    );
+
+    await prisma.shopAnalytics.upsert({
+      where: { shopId: event.shopId },
+      update: {
+        totalVisitors: { increment: 1 },
+        lastVisitedAt: new Date(),
+        countryStats: updatedCountryStats,
+        cityStats: updatedCityStats,
+        deviceStats: updatedDeviceStats,
+      },
+      create: {
+        shopId: event.shopId,
+        totalVisitors: 1,
+        lastVisitedAt: new Date(),
+        countryStats: { [safeCountry]: 1 },
+        cityStats: { [safeCity]: 1 },
+        deviceStats: { [safeDevice]: 1 },
+      },
+    });
+
+    // Record unique visit in `uniqueShopVisitors`
+    if (event.userId) {
+      await prisma.uniqueShopVisitors.upsert({
+        where: {
+          shopId_userId: { shopId: event.shopId, userId: event.userId },
+        },
+        update: { visitedAt: new Date() },
+        create: { shopId: event.shopId, userId: event.userId },
+      });
+    }
+  } catch (err) {
+    console.error("Error updating shop analytics:", err);
   }
 };

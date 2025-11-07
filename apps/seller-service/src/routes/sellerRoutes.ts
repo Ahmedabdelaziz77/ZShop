@@ -4,10 +4,16 @@ import { isSeller } from "packages/middleware/authorizeRoles";
 import isAuthenticated from "packages/middleware/isAuthenticated";
 import {
   deleteSeller,
+  followShop,
+  getSeller,
+  getSellerEvents,
+  getSellerProducts,
   getShopDeletionState,
   getShopSettings,
   getStripeAccount,
+  isFollowingShop,
   restoreSeller,
+  unfollowShop,
   updateShopSettings,
 } from "../controllers/sellerController";
 
@@ -30,5 +36,12 @@ router.get(
 router.put("/restore-shop", isAuthenticated, isSeller, restoreSeller);
 
 router.get("/get-stripe-account", isAuthenticated, getStripeAccount);
+
+router.get("/get-seller-products/:shopId", getSellerProducts);
+router.get("/get-seller-events/:shopId", getSellerEvents);
+router.get("/is-following/:shopId", isAuthenticated, isFollowingShop);
+router.post("/follow-shop", isAuthenticated, followShop);
+router.post("/unfollow-shop", isAuthenticated, unfollowShop);
+router.get("/get-seller/:id", getSeller);
 
 export default router;

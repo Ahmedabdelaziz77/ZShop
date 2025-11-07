@@ -256,3 +256,173 @@ export const getStripeAccount = async (
     return next(err);
   }
 };
+
+export const getSellerProducts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { shopId } = req.params;
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const products = await prisma.products.findMany({
+      where: { shopId, status: "Active", isDeleted: false },
+      skip,
+      take: limit,
+      include: { images: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return res.json({ success: true, products });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const getSellerEvents = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { shopId } = req.params;
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const products = await prisma.products.findMany({
+      where: {
+        shopId,
+        isDeleted: { not: true },
+        OR: [{ starting_date: { not: null } }, { ending_date: { not: null } }],
+      },
+      skip,
+      take: limit,
+      include: { images: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return res.json({ success: true, products });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const isFollowingShop = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?.id;
+    const { shopId } = req.params;
+
+    if (!userId) return next(new AuthError("Unauthorized"));
+
+    const follow = await prisma.shopFollowers.findUnique({
+      where: { shopId_userId: { shopId, userId } },
+    });
+
+    return res.json({ isFollowing: follow });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const followShop = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?.id;
+    const { shopId } = req.body;
+
+    if (!userId) return next(new AuthError("Unauthorized!"));
+
+    if (!shopId)
+      return next(new ValidationError("You should provide a shopId!"));
+
+    await prisma.shopFollowers.create({
+      data: { userId, shopId },
+    });
+
+    return res.json({ success: true, message: "Followed successfully" });
+  } catch (err) {
+    if ((err as any).code === "P2002") {
+      return res.status(400).json({ message: "Already following" });
+    }
+    return next(err);
+  }
+};
+
+export const unfollowShop = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?.id;
+    const { shopId } = req.body;
+
+    if (!userId) return next(new AuthError("Unauthorized!"));
+
+    if (!shopId)
+      return next(new ValidationError("You should provide a shopId!"));
+
+    await prisma.shopFollowers.delete({
+      where: { shopId_userId: { shopId, userId } },
+    });
+
+    return res.json({ success: true, message: "Unfollowed successfully" });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const getSeller = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params; // this is the shopId from the URL
+
+    if (!id) return next(new ValidationError("Shop ID is required!"));
+
+    const shop = await prisma.shops.findUnique({
+      where: { id },
+      include: {
+        avatar: true,
+        reviews: {
+          include: { user: true },
+        },
+        sellers: true,
+      },
+    });
+
+    if (!shop) return next(new ValidationError("Shop not found!"));
+
+    const followersCount = await prisma.shopFollowers.count({
+      where: { shopId: id },
+    });
+
+    const shopData: any = {
+      ...shop,
+      avatar:
+        shop.avatar?.length && shop.avatar[0]?.url ? shop.avatar[0].url : null,
+    };
+
+    return res.status(200).json({
+      success: true,
+      shop: shopData,
+      followersCount,
+    });
+  } catch (err) {
+    console.error("Error in getSeller:", err);
+    return next(err);
+  }
+};
