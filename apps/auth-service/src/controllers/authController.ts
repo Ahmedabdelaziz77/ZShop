@@ -19,7 +19,6 @@ import {
   ValidationError,
 } from "@packages/error-handler";
 import { setCookie } from "../utils/cookies/setCookie";
-import { sendLog } from "@packages/utils/logs/send-logs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20" as any,
@@ -197,13 +196,6 @@ export const refreshToken = async (
 export const getUser = async (req: any, res: Response, next: NextFunction) => {
   try {
     const user = req.user;
-
-    await sendLog({
-      type: "success",
-      message: `User data retrived ${user?.email}`,
-      source: "auth-service",
-    });
-
     res.status(201).json({
       success: true,
       user,
@@ -492,13 +484,6 @@ export const getSeller = async (
 ) => {
   try {
     const seller = req.seller;
-
-    await sendLog({
-      type: "success",
-      message: `Seller data retrived ${seller?.email}`,
-      source: "auth-service",
-    });
-
     res.status(201).json({
       success: true,
       seller,
@@ -511,13 +496,6 @@ export const getSeller = async (
 export const getAdmin = async (req: any, res: Response, next: NextFunction) => {
   try {
     const admin = req.admin;
-
-    await sendLog({
-      type: "success",
-      message: `Admin data retrived ${admin?.email}`,
-      source: "auth-service",
-    });
-
     res.status(201).json({
       success: true,
       admin,
@@ -744,21 +722,21 @@ export const loginAdmin = async (
     const isMatch = await bcrypt.compare(password, user.password!);
     if (!isMatch) return next(new AuthError("Invalid email or password"));
 
-    const isAdmin = user.role === "admin";
-    if (!isAdmin) {
-      sendLog({
-        type: "error",
-        message: `Admin login failed for ${email} - not an admin`,
-        source: "auth-service",
-      });
-      return next(new AuthError("Invalid Access!"));
-    }
+    // const isAdmin = user.role === "admin";
+    // if (!isAdmin) {
+    //   sendLog({
+    //     type: "error",
+    //     message: `Admin login failed for ${email} - not an admin`,
+    //     source: "auth-service",
+    //   });
+    //   return next(new AuthError("Invalid Access!"));
+    // }
 
-    sendLog({
-      type: "success",
-      message: `Admin login successful for: ${email}`,
-      source: "auth-service",
-    });
+    // sendLog({
+    //   type: "success",
+    //   message: `Admin login successful for: ${email}`,
+    //   source: "auth-service",
+    // });
 
     res.clearCookie("seller-access-token");
     res.clearCookie("seller-refresh-token");

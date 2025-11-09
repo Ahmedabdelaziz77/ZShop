@@ -11,9 +11,7 @@
     "../../packages/error-handler/**/*.ts",
     "../../packages/libs/prisma/**/*.ts",
     "../../packages/libs/redis/**/*.ts",
-    "../../packages/utils/logs/**/*.ts",
-    "../../packages/middleware/**/*.ts",
-    "../../packages/utils/**/*.ts"
+    "../../packages/middleware/**/*.ts"
   ],
   "exclude": [
     "out-tsc",

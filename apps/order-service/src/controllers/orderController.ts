@@ -6,7 +6,6 @@ import Stripe from "stripe";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendMail";
 import { Prisma } from "@prisma/client";
-import { sendLog } from "packages/utils/logs/send-logs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20" as any,
@@ -515,12 +514,6 @@ export const createOrder = async (
           orderTotal -= discount;
         }
       }
-
-      await sendLog({
-        type: "success",
-        message: `Order created successfully for user ${user?.email}`,
-        source: "order-service",
-      });
 
       await prisma.orders.create({
         data: {
