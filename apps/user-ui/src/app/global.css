@@ -496,3 +496,18 @@ summary svg {
 .animate-shine {
   animation: shine 0.8s ease-in-out forwards;
 }
+
+@keyframes fadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+.animate-fadeSlideUp {
+  animation: fadeSlideUp 0.45s ease-out forwards;
+}

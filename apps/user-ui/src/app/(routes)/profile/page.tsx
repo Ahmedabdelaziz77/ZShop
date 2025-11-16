@@ -10,7 +10,9 @@ import {
   BadgeCheck,
   Bell,
   CheckCircle,
+  CircleDot,
   Clock,
+  ExternalLink,
   Gift,
   Inbox,
   Loader2,
@@ -30,6 +32,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import OrdersTable from "apps/user-ui/src/shared/components/tables/orders-table";
 import ChangePassword from "apps/user-ui/src/shared/components/changePassword";
 import useRequireAuth from "apps/user-ui/src/hooks/useRequiredAuth";
+import Link from "next/link";
+import toast from "react-hot-toast";
 
 export default function Page() {
   return (
@@ -82,6 +86,14 @@ function ProfileContent() {
       router.push("/login");
     });
   };
+
+  const { data: notifications, isLoading: notificationsLoading } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/admin/api/get-user-notifications");
+      return res.data.notifications;
+    },
+  });
 
   return (
     <div className="bg-gray-50 p-6 pb-14">
@@ -207,8 +219,122 @@ function ProfileContent() {
               <OrdersTable />
             ) : activeTab === "Change Password" ? (
               <ChangePassword />
+            ) : activeTab === "Notifications" ? (
+              <div className="space-y-4">
+                {/* Loading */}
+                {notificationsLoading && (
+                  <div className="flex justify-center py-10">
+                    <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                  </div>
+                )}
+
+                {/* Empty */}
+                {!notificationsLoading && notifications?.length === 0 && (
+                  <p className="text-center py-10 text-gray-500">
+                    No Notifications available yet!
+                  </p>
+                )}
+
+                {/* SORTED + Animated List */}
+                {!notificationsLoading &&
+                  notifications &&
+                  [...notifications]
+                    .sort((a, b) =>
+                      a.isRead === b.isRead ? 0 : a.isRead ? 1 : -1
+                    )
+                    .map((not, idx) => (
+                      <div
+                        key={not.id}
+                        style={{ animationDelay: `${idx * 80}ms` }}
+                        className={`group border border-gray-200 rounded-xl p-5 shadow-sm
+              opacity-0 animate-fadeSlideUp transition-all duration-300 ease-out
+              hover:shadow-md hover:border-blue-400
+              ${!not.isRead ? "bg-blue-50 border-blue-300" : "bg-white"}
+            `}
+                      >
+                        <div className="flex justify-between items-start">
+                          {/* LEFT SIDE */}
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-gray-800 font-semibold text-base">
+                                {not.title}
+                              </h3>
+
+                              {!not.isRead && (
+                                <span className="px-2 py-0.5 text-[10px] rounded-full bg-blue-600 text-white">
+                                  NEW
+                                </span>
+                              )}
+                            </div>
+
+                            <p className="text-gray-600 text-sm">
+                              {not.message}
+                            </p>
+
+                            {/* Creator */}
+                            <p className="text-gray-400 text-xs flex items-center gap-1 mt-1">
+                              <User className="w-3 h-3" /> Created by:{" "}
+                              {not.creatorId}
+                            </p>
+
+                            {/* Dates */}
+                            <div className="flex gap-4 text-xs text-gray-400 mt-1">
+                              <span>
+                                Created:&nbsp;
+                                <span className="text-gray-500">
+                                  {new Date(not.createdAt).toLocaleString()}
+                                </span>
+                              </span>
+
+                              <span>
+                                Updated:&nbsp;
+                                <span className="text-gray-500">
+                                  {new Date(not.updatedAt).toLocaleString()}
+                                </span>
+                              </span>
+                            </div>
+
+                            {/* Redirect link */}
+                            {not.redirect_link && (
+                              <Link
+                                href={not.redirect_link}
+                                className="mt-2 text-blue-600 text-xs font-medium flex items-center gap-1 hover:underline"
+                              >
+                                View Details
+                                <ExternalLink className="w-3 h-3" />
+                              </Link>
+                            )}
+                          </div>
+
+                          {/* ACTION BUTTON */}
+                          {!not.isRead ? (
+                            <button
+                              onClick={async () => {
+                                await axiosInstance.post(
+                                  "/seller/api/mark-notification-as-read",
+                                  { notificationId: not.id }
+                                );
+
+                                queryClient.invalidateQueries({
+                                  queryKey: ["notifications"],
+                                });
+                                toast.success("Notification marked as read");
+                              }}
+                              className="text-blue-600 hover:text-blue-700
+                  text-sm flex items-center gap-1 font-medium"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                              Mark as read
+                            </button>
+                          ) : (
+                            <CircleDot className="w-4 h-4 text-gray-400" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+              </div>
             ) : (
-              <></>
+              <p>Not Found</p>
             )}
           </div>
 

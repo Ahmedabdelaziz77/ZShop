@@ -426,3 +426,51 @@ export const getSeller = async (
     return next(err);
   }
 };
+
+export const sellerNotifications = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const sellerId = (req as any).seller.id;
+    const notifications = await prisma.notifications.findMany({
+      where: { receiverId: sellerId },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      notifications,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const markNotificationAsRead = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { notificationId } = req.body;
+
+    if (!notificationId)
+      return next(new ValidationError("Notification id is required!"));
+
+    const notification = await prisma.notifications.update({
+      where: { id: notificationId },
+      data: { isRead: true },
+    });
+
+    res.status(200).json({
+      success: true,
+      notification,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};

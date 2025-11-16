@@ -12,7 +12,9 @@ import {
   getShopSettings,
   getStripeAccount,
   isFollowingShop,
+  markNotificationAsRead,
   restoreSeller,
+  sellerNotifications,
   unfollowShop,
   updateShopSettings,
 } from "../controllers/sellerController";
@@ -43,5 +45,17 @@ router.get("/is-following/:shopId", isAuthenticated, isFollowingShop);
 router.post("/follow-shop", isAuthenticated, followShop);
 router.post("/unfollow-shop", isAuthenticated, unfollowShop);
 router.get("/get-seller/:id", getSeller);
+
+router.get(
+  "/seller-notifications",
+  isAuthenticated,
+  isSeller,
+  sellerNotifications
+);
+router.post(
+  "/mark-notification-as-read",
+  isAuthenticated,
+  markNotificationAsRead
+);
 
 export default router;

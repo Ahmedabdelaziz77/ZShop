@@ -484,3 +484,45 @@ export const uploadBanner = async (
     return next(err);
   }
 };
+
+export const getAllNotifications = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const notifications = await prisma.notifications.findMany({
+      where: { receiverId: "admin" },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.status(200).json({
+      success: true,
+      notifications,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const getAllUserNotifications = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = (req as any).user.id;
+
+    const notifications = await prisma.notifications.findMany({
+      where: { receiverId: userId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return res.status(200).json({
+      success: true,
+      notifications,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};

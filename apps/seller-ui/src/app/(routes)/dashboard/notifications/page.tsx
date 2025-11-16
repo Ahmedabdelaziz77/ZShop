@@ -1,37 +1,41 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import BreadCrumbs from "apps/admin-ui/src/shared/components/breadCrumbs";
-import axiosInstance from "apps/admin-ui/src/utils/axiosInstance";
+import BreadCrumbs from "apps/seller-ui/src/shared/components/breadCrumbs";
+import axiosInstance from "apps/seller-ui/src/utils/axiosInstance";
 import { CheckCircle2, ExternalLink, User, CircleDot } from "lucide-react";
-import Link from "next/link";
 import { useMemo } from "react";
+import Link from "next/link";
+import toast from "react-hot-toast";
 
 export default function Page() {
   const queryClient = useQueryClient();
 
   const { data: notifications, isLoading } = useQuery({
-    queryKey: ["notifications"],
+    queryKey: ["seller-notifications"],
     queryFn: async () => {
-      const res = await axiosInstance.get("/admin/api/get-all-notifications");
+      const res = await axiosInstance.get("/seller/api/seller-notifications");
       return res.data.notifications;
     },
   });
 
-  const markAsRead = async (notificationId: string) => {
+  const markAsRead = async (id: string) => {
     await axiosInstance.post("/seller/api/mark-notification-as-read", {
-      notificationId,
+      notificationId: id,
     });
 
-    queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    queryClient.invalidateQueries({ queryKey: ["seller-notifications"] });
+
+    // ⬅️ SHOW TOAST (react-hot-toast)
+    toast.success("Notification marked as read");
   };
 
+  // === SORT unread first ===
   const sortedNotifications = useMemo(() => {
     if (!notifications) return [];
-    return [...notifications].sort((a, b) => {
-      if (a.isRead === b.isRead) return 0;
-      return a.isRead ? 1 : -1;
-    });
+    return [...notifications].sort((a, b) =>
+      a.isRead === b.isRead ? 0 : a.isRead ? 1 : -1
+    );
   }, [notifications]);
 
   return (
@@ -40,7 +44,7 @@ export default function Page() {
       <BreadCrumbs title="Notifications" />
 
       {!isLoading && sortedNotifications?.length === 0 && (
-        <p className="text-center py-24 text-white text-sm">
+        <p className="text-center pt-24 text-white text-sm font-Poppins">
           No Notifications available yet!
         </p>
       )}
@@ -65,9 +69,7 @@ export default function Page() {
               `}
             >
               <div className="flex justify-between items-start">
-                {/* LEFT SIDE */}
                 <div className="flex flex-col gap-2">
-                  {/* Title + NEW badge */}
                   <div className="flex items-center gap-2">
                     <h3 className="text-white font-semibold text-lg">
                       {not.title}
@@ -79,26 +81,22 @@ export default function Page() {
                     )}
                   </div>
 
-                  {/* Message */}
                   <p className="text-gray-300 text-sm leading-relaxed">
                     {not.message}
                   </p>
 
-                  {/* Creator */}
                   <div className="flex items-center gap-1 text-gray-400 text-xs mt-1">
                     <User size={13} />
                     <span>Created by: {not.creatorId}</span>
                   </div>
 
-                  {/* Receiver */}
-                  <div className="text-gray-500 text-xs">
+                  <p className="text-gray-500 text-xs">
                     Receiver:{" "}
                     <span className="text-gray-400">
-                      {not.receiverId || "—"}
+                      {not.receiverId || "seller"}
                     </span>
-                  </div>
+                  </p>
 
-                  {/* Dates */}
                   <div className="flex gap-5 mt-2 text-gray-500 text-xs">
                     <span>
                       Created:{" "}
@@ -114,7 +112,6 @@ export default function Page() {
                     </span>
                   </div>
 
-                  {/* Redirect Link */}
                   {not.redirect_link && (
                     <Link
                       href={not.redirect_link}
@@ -125,11 +122,12 @@ export default function Page() {
                   )}
                 </div>
 
-                {/* RIGHT SIDE */}
                 {!not.isRead ? (
                   <button
                     onClick={() => markAsRead(not.id)}
-                    className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition px-3 py-1 rounded-md border border-blue-700/40 hover:border-blue-500/60"
+                    className="flex items-center gap-1 text-blue-400 hover:text-blue-300
+                      transition px-3 py-1 rounded-md border border-blue-700/40
+                      hover:border-blue-500/60"
                   >
                     <CheckCircle2 size={16} />
                     <span className="text-sm">Mark as read</span>

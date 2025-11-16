@@ -5,8 +5,10 @@ import {
   getAllAdmins,
   getAllCustomizations,
   getAllEvents,
+  getAllNotifications,
   getAllProducts,
   getAllSellers,
+  getAllUserNotifications,
   getAllUsers,
   getSiteConfig,
   unbanUser,
@@ -35,5 +37,14 @@ router.get("/get-site-config", getSiteConfig);
 router.put("/update-categories", isAuthenticated, isAdmin, updateCategories);
 router.post("/upload-logo", isAuthenticated, isAdmin, uploadLogo);
 router.post("/upload-banner", isAuthenticated, isAdmin, uploadBanner);
+
+router.get(
+  "/get-all-notifications",
+  isAuthenticated,
+  isAdmin,
+  getAllNotifications
+);
+
+router.get("/get-user-notifications", isAuthenticated, getAllUserNotifications);
 
 export default router;

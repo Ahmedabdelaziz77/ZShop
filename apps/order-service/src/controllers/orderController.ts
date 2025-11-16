@@ -6,6 +6,7 @@ import Stripe from "stripe";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendMail";
 import { Prisma } from "@prisma/client";
+import { sendLog } from "packages/utils/logs/send-logs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20" as any,
@@ -515,7 +516,13 @@ export const createOrder = async (
         }
       }
 
-      await prisma.orders.create({
+      await sendLog({
+        type: "success",
+        message: `Order created successfully for user ${user?.email}`,
+        source: "order-service",
+      });
+
+      const order = await prisma.orders.create({
         data: {
           userId,
           shopId,
@@ -591,59 +598,59 @@ export const createOrder = async (
           });
         }
       }
-    }
+      await sendEmail(
+        email,
+        "Your Zshop Order Confirmation",
+        "order-confirmation",
+        {
+          name,
+          cart,
+          totalAmount:
+            coupon?.discountAmount && totalAmount > coupon.discountAmount
+              ? totalAmount - coupon.discountAmount
+              : totalAmount,
+          trackingUrl: `http://localhost:3002/order/${order.id}`,
+        }
+      );
 
-    await sendEmail(
-      email,
-      "Your Zshop Order Confirmation",
-      "order-confirmation",
-      {
-        name,
-        cart,
-        totalAmount:
-          coupon?.discountAmount && totalAmount > coupon.discountAmount
-            ? totalAmount - coupon.discountAmount
-            : totalAmount,
-        trackingUrl: `https://zshop.com/order/${sessionId}`,
+      const createdShopIds = Object.keys(shopGrouped);
+      const sellerShops = await prisma.shops.findMany({
+        where: { id: { in: createdShopIds } },
+        select: { id: true, sellerId: true, name: true },
+      });
+
+      for (const shop of sellerShops) {
+        const productTitle =
+          (shopGrouped[shop.id]?.[0]?.title as string) || "new item";
+        await prisma.notifications.createMany({
+          data: [
+            {
+              title: "New Order Received",
+              message: `A customer just ordered ${productTitle} from your shop.`,
+              creatorId: userId,
+              receiverId: shop.sellerId,
+              redirect_link: `order/${order.id}`,
+            },
+            {
+              title: "Platform Order Alert",
+              message: `A new order was placed by ${name}.`,
+              creatorId: userId,
+              receiverId: "admin",
+              redirect_link: `order/${order.id}`,
+            },
+          ],
+        });
       }
-    );
-    const createdShopIds = Object.keys(shopGrouped);
-    const sellerShops = await prisma.shops.findMany({
-      where: { id: { in: createdShopIds } },
-      select: { id: true, sellerId: true, name: true },
-    });
 
-    for (const shop of sellerShops) {
-      const productTitle =
-        (shopGrouped[shop.id]?.[0]?.title as string) || "new item";
-      await prisma.notifications.createMany({
-        data: [
-          {
-            title: "New Order Received",
-            message: `A customer just ordered ${productTitle} from your shop.`,
-            creatorId: userId,
-            receiverId: shop.sellerId,
-            redirect_link: `https://zshop.com/order/${sessionId}`,
-          },
-          {
-            title: "Platform Order Alert",
-            message: `A new order was placed by ${name}.`,
-            creatorId: userId,
-            receiverId: "admin",
-            redirect_link: `https://zshop.com/order/${sessionId}`,
-          },
-        ],
+      await redis.del(sessionKey);
+
+      return res.status(200).json({
+        received: true,
+        message: `✅ Order placed successfully in ${
+          isWebhook ? "webhook" : "manual"
+        } mode!`,
       });
     }
-
-    await redis.del(sessionKey);
-
-    return res.status(200).json({
-      received: true,
-      message: `✅ Order placed successfully in ${
-        isWebhook ? "webhook" : "manual"
-      } mode!`,
-    });
   } catch (err) {
     console.error("❌ Error in createOrder:", err);
     return next(err);
