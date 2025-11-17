@@ -53,6 +53,7 @@ app.use(
     },
   })
 );
+app.use("/recommendation", proxy("http://localhost:6007"));
 app.use("/chatting", proxy("http://localhost:6006"));
 app.use("/seller", proxy("http://localhost:6003"));
 app.use("/order", proxy("http://localhost:6004"));
