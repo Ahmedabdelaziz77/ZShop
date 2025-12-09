@@ -1,4 +1,4 @@
-# 🛒 Full-Stack Microservices E-Commerce Marketplace (Nx Monorepo)
+# 🛒 Full-Stack Micro-Services E-Commerce Marketplace (Nx Monorepo)
 
 <p align="center">
   <img width="167" height="115" alt="Marketplace Logo" src="https://github.com/user-attachments/assets/5763da26-35e7-4496-9ed3-36d79382d203" />
@@ -757,4 +757,5 @@ flowchart TD
 9. Chat, notifications, logger service with Kafka + WebSockets
 10. Redpanda migration, analytics models
 11. TensorFlow.js recommendation engine + hardening (errors, rate limits, Jest, CI, Docker)
+
 
