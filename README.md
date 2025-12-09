@@ -1,5 +1,7 @@
 # 🛒 Full-Stack E-Commerce Marketplace (Nx Monorepo)
 
+<img width="167" height="115" alt="Image" src="https://github.com/user-attachments/assets/5763da26-35e7-4496-9ed3-36d79382d203" /> 
+
 A production-oriented **multi-tenant marketplace** with:
 
 - Separate **User**, **Seller**, and **Admin** portals
@@ -993,3 +995,4 @@ A (short) story of the repo’s evolution:
 
 ```
 ```
+
