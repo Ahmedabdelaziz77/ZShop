@@ -70,89 +70,6 @@ Backend apps are **Express services**, frontend apps are **Next.js** UIs, all or
 
 ---
 
-## 🛠 Tech Stack
-
-**Backend**
-
-* **Node.js**, **Express**
-* Middleware: `cors`, `cookie-parser`, `morgan`, `express-rate-limit`, `express-http-proxy`, `axios`
-* **Prisma** ORM + **MongoDB**
-* **Redis (Upstash)** for caching, OTP cooldown, spam locking & session-like flows
-* **Stripe** for payments
-* **ImageKit** for media storage & AI enhancements (Remove BG, Retouch, Drop Shadow, Upscale)
-* **Nodemailer + Gmail + EJS** for email templates
-* **JWT** for access / refresh / reset tokens
-* **Crypto + RegExp** for validation and secure token generation
-* **Swagger / swagger-ui** for API docs
-* **Docker** for containerization
-* **Kafka → Redpanda** for analytics events, chat, logs, and recommendations
-* **TensorFlow.js** (Node) for real-time recommendation model
-
-**Frontend**
-
-* **Next.js** (via Nx) for `user-ui`, `seller-ui`, `admin-ui`
-* **Tailwind CSS** for user UI styling
-* **Styled-components** + **Jotai** for seller dashboard
-* **TanStack Query** (React Query) for data fetching
-* **TanStack Table** for data-heavy tables
-* **React Hook Form** with `Controller`, `useFieldArray`, custom `<Input />` and `<Textarea />`
-* **React Quill** for rich text editing
-* **React Image Magnify** for zoomable product images
-* **Zustand** for cart & wishlist global state
-* **Framer Motion** for animations & transitions
-* **ApexCharts**, **Recharts**, **react-simple-maps** for dashboards
-* **React Hot Toast** for notifications
-
-**Infra & Ops**
-
-* **Nx** for dev tools, targets & execution
-* **Jest** for unit testing
-* **GitHub Actions** for CI (tests, linting, etc.)
-* **Redis (Upstash)** as managed cache
-* **Redpanda** cluster as Kafka-compatible event bus
-
----
-
-## 🧰 Monorepo, Tooling & CI
-
-* **Nx Monorepo**
-
-  * Shared libraries (middleware, utils, types) across services
-  * Targets like `serve`, `test`, `build` through Nx
-* **Testing**
-
-  * **Jest** for unit tests in services and shared libs
-  * Test scripts wired into **GitHub Actions** for PR & main branch checks
-* **Docker**
-
-  * Each service and UI can be containerized
-  * Suitable for local multi-container setups and deployment
-* **Swagger Codegen**
-
-  * Per-service Swagger definitions via scripts:
-
-    * `auth-docs`, `product-docs`, `order-docs`, `admin-docs`, `seller-docs`, `chatting-docs`
-
----
-
-## ✨ High Level Features
-
-* Multi-role authentication: **user / seller / admin**
-* OTP-based verification + **forgot/reset password**
-* **JWT access & refresh** tokens, secure cookie handling
-* User, seller, and admin dashboards with **real analytics**
-* Full **order flow** with Stripe payment intent + checkout sessions
-* **Cart & Wishlist** state with persistence (Zustand)
-* **Product management** (create, update, soft delete, restore, scheduled deletion)
-* **Offers & events**, discount codes, top shops, advanced filtering & search
-* **Real-time chat** between users & sellers (WebSockets) with Kafka & Redis
-* **Notifications** across user, seller & admin
-* **AI-powered recommendations** using TensorFlow.js (Neural Matrix Factorization)
-* **Global logging system** streamed to admins
-* **Dynamic site customization**: categories, subcategories, banners, logos
-
----
-
 ## 🏗 Architecture
 ```mermaid
   flowchart LR
@@ -215,6 +132,68 @@ Backend apps are **Express services**, frontend apps are **Next.js** UIs, all or
 ```
 
 ---
+
+## 🛠 Tech Stack
+
+**Backend**
+
+* **Node.js**, **Express**
+* Middleware: `cors`, `cookie-parser`, `morgan`, `express-rate-limit`, `express-http-proxy`, `axios`
+* **Prisma** ORM + **MongoDB**
+* **Redis (Upstash)** for caching, OTP cooldown, spam locking & session-like flows
+* **Stripe** for payments
+* **ImageKit** for media storage & AI enhancements (Remove BG, Retouch, Drop Shadow, Upscale)
+* **Nodemailer + Gmail + EJS** for email templates
+* **JWT** for access / refresh / reset tokens
+* **Crypto + RegExp** for validation and secure token generation
+* **Swagger / swagger-ui** for API docs
+* **Docker** for containerization
+* **Kafka → Redpanda** for analytics events, chat, logs, and recommendations
+* **TensorFlow.js** (Node) for real-time recommendation model
+
+**Frontend**
+
+* **Next.js** (via Nx) for `user-ui`, `seller-ui`, `admin-ui`
+* **Tailwind CSS** for user UI styling
+* **Styled-components** + **Jotai** for seller dashboard
+* **TanStack Query** (React Query) for data fetching
+* **TanStack Table** for data-heavy tables
+* **React Hook Form** with `Controller`, `useFieldArray`, custom `<Input />` and `<Textarea />`
+* **React Quill** for rich text editing
+* **React Image Magnify** for zoomable product images
+* **Zustand** for cart & wishlist global state
+* **Framer Motion** for animations & transitions
+* **ApexCharts**, **Recharts**, **react-simple-maps** for dashboards
+* **React Hot Toast** for notifications
+
+**Infra & Ops**
+
+* **Nx** for dev tools, targets & execution
+* **Jest** for unit testing
+* **GitHub Actions** for CI (tests, linting, etc.)
+* **Redis (Upstash)** as managed cache
+* **Redpanda** cluster as Kafka-compatible event bus
+
+---
+
+## ✨ High Level Features
+
+* Multi-role authentication: **user / seller / admin**
+* OTP-based verification + **forgot/reset password**
+* **JWT access & refresh** tokens, secure cookie handling
+* User, seller, and admin dashboards with **real analytics**
+* Full **order flow** with Stripe payment intent + checkout sessions
+* **Cart & Wishlist** state with persistence (Zustand)
+* **Product management** (create, update, soft delete, restore, scheduled deletion)
+* **Offers & events**, discount codes, top shops, advanced filtering & search
+* **Real-time chat** between users & sellers (WebSockets) with Kafka & Redis
+* **Notifications** across user, seller & admin
+* **AI-powered recommendations** using TensorFlow.js (Neural Matrix Factorization)
+* **Global logging system** streamed to admins
+* **Dynamic site customization**: categories, subcategories, banners, logos
+
+---
+
 
 ## 🗃 Database & ER Diagram
 
@@ -995,6 +974,7 @@ A (short) story of the repo’s evolution:
 
 ```
 ```
+
 
 
 
