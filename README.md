@@ -36,7 +36,7 @@ A production-ready **multi-tenant marketplace** with:
 * [Development Journey](#development-journey)
 
 ---
-
+<a id="project-structure"></a>
 ## 🧱 Project Structure
 
 Nx monorepo:
@@ -757,5 +757,6 @@ flowchart TD
 9. Chat, notifications, logger service with Kafka + WebSockets
 10. Redpanda migration, analytics models
 11. TensorFlow.js recommendation engine + hardening (errors, rate limits, Jest, CI, Docker)
+
 
 
