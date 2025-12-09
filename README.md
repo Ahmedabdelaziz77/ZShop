@@ -847,20 +847,21 @@ Open the URL printed in the console (usually `/docs` or `/swagger`).
 ### User Registration & OTP Flow
 
 ```mermaid
-flowchart TD
-    A[User UI] --> B[/user-registeration/]
-    B --> C[Auth Service - RegisterUser]
-    C --> D[(MongoDB: users)]
-    D --> E[Generate OTP + store in Redis (cooldown)]
-    E --> F[Send verification email via Nodemailer + EJS]
-    F --> G[User submits /verify-user with OTP]
-    G --> H[Auth Service - verifyUser (check Redis, regex)]
-    H --> I[Account verified]
+  flowchart TD
+    A["User UI"] --> B["POST /user-registration"]
+    B --> C["Auth Service: RegisterUser"]
+    C --> D["MongoDB: users"]
+    D --> E["Generate OTP and store in Redis (cooldown)"]
+    E --> F["Send verification email (Nodemailer + EJS)"]
+    F --> G["User submits /verify-user with OTP"]
+    G --> H["Auth Service: verifyUser (check Redis + regex)"]
+    H --> I["Account verified"]
+  
+    I --> J["User logs in at /login-user"]
+    J --> K["Issue JWT access & refresh tokens"]
+    K --> L["Store tokens (cookies / headers)"]
+    L --> M["User UI uses axiosInstance + TanStack Query"]
 
-    I --> J[User logs in /login-user]
-    J --> K[JWT access + refresh tokens issued]
-    K --> L[Tokens stored (cookies/headers)]
-    L --> M[User UI uses axiosInstance + TanStack Query]
 ```
 
 ---
@@ -994,6 +995,7 @@ A (short) story of the repo’s evolution:
 
 ```
 ```
+
 
 
 
