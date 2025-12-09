@@ -154,67 +154,64 @@ Backend apps are **Express services**, frontend apps are **Next.js** UIs, all or
 ---
 
 ## 🏗 Architecture
-
-```mermaid
 flowchart LR
-    subgraph Frontend
-        UUI[User UI (Next.js)]
-        SUI[Seller UI (Next.js)]
-        AUI[Admin UI (Next.js)]
-    end
+  subgraph Frontend
+    UUI["User UI (Next.js)"]
+    SUI["Seller UI (Next.js)"]
+    AUI["Admin UI (Next.js)"]
+  end
 
-    subgraph Backend
-        APIGW[API Gateway (Express HTTP Proxy)]
+  subgraph Backend
+    APIGW["API Gateway (Express HTTP Proxy)"]
+    AUTH["Auth Service"]
+    PROD["Product Service"]
+    ORDER["Order Service"]
+    ADMIN["Admin Service"]
+    SELLER["Seller Service"]
+    CHAT["Chatting Service"]
+    RECO["Recommendation Service"]
+    LOG["Logger Service"]
+    KAFKA["Redpanda (Kafka-compatible)"]
+  end
 
-        AUTH[Auth Service]
-        PROD[Product Service]
-        ORDER[Order Service]
-        ADMIN[Admin Service]
-        SELLER[Seller Service]
-        CHAT[Chatting Service]
-        RECO[Recommendation Service]
-        LOG[Logger Service]
-        KAFKA[Redpanda (Kafka-compatible)]
-    end
+  subgraph Infra
+    MONGO["MongoDB"]
+    REDIS["Redis (Upstash)"]
+    STRIPE["Stripe"]
+    SMTP["SMTP (Gmail)"]
+    IMG["ImageKit"]
+  end
 
-    subgraph Infra
-        MONGO[(MongoDB)]
-        REDIS[(Redis - Upstash)]
-        STRIPE[Stripe]
-        SMTP[SMTP (Gmail)]
-        IMG[ImageKit]
-    end
+  UUI -->|HTTP| APIGW
+  SUI -->|HTTP| APIGW
+  AUI -->|HTTP| APIGW
 
-    UUI -->|HTTP| APIGW
-    SUI -->|HTTP| APIGW
-    AUI -->|HTTP| APIGW
+  APIGW --> AUTH
+  APIGW --> PROD
+  APIGW --> ORDER
+  APIGW --> ADMIN
+  APIGW --> SELLER
+  APIGW --> CHAT
+  APIGW --> RECO
+  APIGW --> LOG
 
-    APIGW --> AUTH
-    APIGW --> PROD
-    APIGW --> ORDER
-    APIGW --> ADMIN
-    APIGW --> SELLER
-    APIGW --> CHAT
-    APIGW --> RECO
-    APIGW --> LOG
+  AUTH --> MONGO
+  PROD --> MONGO
+  ORDER --> MONGO
+  ADMIN --> MONGO
+  SELLER --> MONGO
+  CHAT --> MONGO
+  RECO --> MONGO
 
-    AUTH --> MONGO
-    PROD --> MONGO
-    ORDER --> MONGO
-    ADMIN --> MONGO
-    SELLER --> MONGO
-    CHAT --> MONGO
-    RECO --> MONGO
+  AUTH --> REDIS
+  ORDER --> STRIPE
+  PROD --> IMG
+  APIGW --> KAFKA
+  CHAT --> KAFKA
+  LOG --> KAFKA
 
-    AUTH --> REDIS
-    ORDER --> STRIPE
-    PROD --> IMG
-    APIGW --> KAFKA
-    CHAT --> KAFKA
-    LOG --> KAFKA
+  AUTH --> SMTP
 
-    AUTH --> SMTP
-```
 
 ---
 
@@ -995,4 +992,5 @@ A (short) story of the repo’s evolution:
 
 ```
 ```
+
 
