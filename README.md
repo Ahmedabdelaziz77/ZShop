@@ -868,26 +868,27 @@ flowchart TD
 ### Order Creation & Payments Flow
 
 ```mermaid
-flowchart TD
-    U[User UI] --> PI[/create-payment-intent/]
-    PI --> OS[Order Service - createPaymentIntent]
-    OS --> STRIPE[Stripe PaymentIntent]
+  flowchart TD
+    U["User UI"] --> PI["POST /create-payment-intent"]
+    PI --> OS["Order Service: createPaymentIntent"]
+    OS --> STRIPE["Stripe PaymentIntent"]
     STRIPE --> OS
     OS --> U
+  
+    U --> PS["POST /create-payment-session"]
+    PS --> OS2["Order Service: createPaymentSession"]
+    OS2 --> REDISC["Redis cache (one session per cart)"]
+    OS2 --> STRIPE2["Stripe Checkout Session"]
+  
+    STRIPE2 -->|Webhook| WH["Order Service Webhook"]
+    WH --> V["Verify event signature"]
+    V --> ORD["MongoDB: orders, orderItems"]
+    V --> ANA["Analytics: productAnalytics, userAnalytics"]
+    V --> MAIL["Send emails (Nodemailer)"]
+    V --> NOTIF["Create notifications for seller & admin"]
+  
+    ORD --> U2["User sees order in /get-user-orders"]
 
-    U --> PS[/create-payment-session/]
-    PS --> OS2[createPaymentSession]
-    OS2 --> REDISC[Redis cache: one session per cart]
-    OS2 --> STRIPE2[Stripe Checkout Session]
-
-    STRIPE2 -->|Webhook| WH[Order Service Webhook]
-    WH --> V[Verify event signature]
-    V --> ORD[(MongoDB: orders, orderItems)]
-    V --> ANA[(Analytics: productAnalytics, userAnalytics)]
-    V --> MAIL[Send emails (Nodemailer)]
-    V --> NOTIF[Create notifications for seller + admin]
-
-    ORD --> U2[User sees order in /get-user-orders]
 ```
 
 ---
@@ -993,6 +994,7 @@ A (short) story of the repo’s evolution:
 
 ```
 ```
+
 
 
 
