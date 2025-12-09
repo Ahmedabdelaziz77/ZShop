@@ -61,7 +61,7 @@ apps/
 Backend = **Express services**, frontend = **Next.js**, all orchestrated with **Nx**.
 
 ---
-
+<a id="architecture"></a>
 ## 🏗 Architecture
 
 ```mermaid
@@ -125,7 +125,7 @@ flowchart LR
 ```
 
 ---
-
+<a id="tech-stack"></a>
 ## 🛠 Tech Stack
 
 **Backend**
@@ -163,7 +163,7 @@ flowchart LR
 * **GitHub Actions** – CI pipelines
 
 ---
-
+<a id="high-level-features"></a>
 ## ✨ High Level Features
 
 * Roles: **User / Seller / Admin**
@@ -179,7 +179,7 @@ flowchart LR
 * Dynamic site config (categories, logo, banner)
 
 ---
-
+<a id="database--er-diagram"></a>
 ## 🗃 Database & ER Diagram
 
 Prisma models:
@@ -306,7 +306,7 @@ erDiagram
 ```
 
 ---
-
+<a id="backend-services"></a>
 ## 🧩 Backend Services
 
 Each service (Express):
@@ -379,7 +379,7 @@ Each service (Express):
 * REST endpoints: conversations, messages
 
 ---
-
+<a id="authentication--security"></a>
 ## 🔐 Authentication & Security
 
 * JWT access + refresh (cookies/headers)
@@ -390,7 +390,7 @@ Each service (Express):
 * Express HTTP proxy (API gateway) in front of services
 
 ---
-
+<a id="frontends"></a>
 ## 🖥 Frontends
 
 ### User UI (Next.js + Nx)
@@ -461,7 +461,7 @@ Each service (Express):
 * Banner/logo are dynamic and used in user UI
 
 ---
-
+<a id="analytics--recommendations"></a>
 ## 📊 Analytics & Recommendations
 
 * Events:
@@ -485,7 +485,7 @@ Each service (Express):
 6. Return top 10 products
 
 ---
-
+<a id="real-time-chat--logger"></a>
 ## 💬 Real-Time Chat & Logger
 
 ### Chat
@@ -506,7 +506,7 @@ Each service (Express):
 * Admins can filter & download logs
 
 ---
-
+<a id="notifications"></a>
 ## 🔔 Notifications
 
 * `notifications` model: `creatorId`, `receiverId`, `title`, `message`, `redirect_link`, `isRead`
@@ -522,7 +522,7 @@ Each service (Express):
 * Integrated in user, seller, admin UIs
 
 ---
-
+<a id="environment-variables"></a>
 ## 🌱 Environment Variables
 
 > Templates only. Do **not** commit real values.
@@ -583,7 +583,7 @@ NEXT_PUBLIC_SOCKET_URI="ws://localhost:6008"
 ```
 
 ---
-
+<a id="running-locally"></a>
 ## ▶️ Running Locally
 
 1. **Install deps**
@@ -635,7 +635,7 @@ NEXT_PUBLIC_SOCKET_URI="ws://localhost:6008"
    ```
 
 ---
-
+<a id="swagger-api-docs"></a>
 ## 📜 Swagger API Docs
 
 ```bash
@@ -650,7 +650,7 @@ npm run chatting-docs
 Open the URLs printed in the console (usually `/docs` or `/swagger`).
 
 ---
-
+<a id="core-flows"></a>
 ## 🔄 Core Flows
 
 ### User Registration & OTP Flow
@@ -743,7 +743,7 @@ flowchart TD
 ```
 
 ---
-
+<a id="development-journey"></a>
 ## 🧭 Development Journey
 
 1. Nx monorepo, Prisma + MongoDB
@@ -757,6 +757,7 @@ flowchart TD
 9. Chat, notifications, logger service with Kafka + WebSockets
 10. Redpanda migration, analytics models
 11. TensorFlow.js recommendation engine + hardening (errors, rate limits, Jest, CI, Docker)
+
 
 
 
