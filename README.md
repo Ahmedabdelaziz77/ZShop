@@ -11,8 +11,6 @@ A production-ready **multi-tenant marketplace** with:
 * **Analytics + AI recommendations** (TensorFlow.js)
 * Real-time **chat**, **notifications**, **logging** and **dashboards**
 
-> ⚠️ **Security**
-> Never commit real `.env` files or secrets. Replace everything with your own safe values.
 
 ---
 
